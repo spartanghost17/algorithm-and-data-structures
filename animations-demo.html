@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Animation Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 50px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .demo-box {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 10px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* 1. Fade In Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 2s ease-in infinite alternate;
+        }
+
+        /* 2. Slide In Animation */
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 1.5s ease-out infinite alternate;
+        }
+
+        /* 3. Bounce Animation */
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-30px);
+            }
+        }
+
+        .bounce {
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        /* 4. Rotate Animation */
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .rotate {
+            animation: rotate 3s linear infinite;
+        }
+
+        /* 5. Scale/Pulse Animation */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* 6. Shake Animation */
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-10px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(10px);
+            }
+        }
+
+        .shake {
+            animation: shake 0.8s ease-in-out infinite;
+        }
+
+        /* 7. Flip Animation */
+        @keyframes flip {
+            from {
+                transform: rotateY(0deg);
+            }
+            to {
+                transform: rotateY(360deg);
+            }
+        }
+
+        .flip {
+            animation: flip 2s ease-in-out infinite;
+        }
+
+        /* 8. Color Change Animation */
+        @keyframes colorChange {
+            0% {
+                background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            }
+            33% {
+                background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            }
+            66% {
+                background: linear-gradient(45deg, #43e97b 0%, #38f9d7 100%);
+            }
+            100% {
+                background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            }
+        }
+
+        .color-change {
+            animation: colorChange 4s ease-in-out infinite;
+        }
+
+        /* 9. Glow Animation */
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(255, 255, 255, 1),
+                            0 0 60px rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        .glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        /* 10. Swing Animation */
+        @keyframes swing {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(15deg);
+            }
+            75% {
+                transform: rotate(-15deg);
+            }
+        }
+
+        .swing {
+            transform-origin: top center;
+            animation: swing 2s ease-in-out infinite;
+        }
+
+        /* 11. Fade In Down (for title) */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 12. Zoom In/Out Animation */
+        @keyframes zoomInOut {
+            0%, 100% {
+                transform: scale(0.8);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .zoom {
+            animation: zoomInOut 2s ease-in-out infinite;
+        }
+
+        /* Interactive hover effects */
+        .card:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+
+        .demo-box:hover {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 CSS Animation Showcase</h1>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>1. Fade In</h2>
+                <div class="demo-box fade-in">Fade</div>
+                <p>Smoothly transitions opacity from 0 to 1</p>
+            </div>
+
+            <div class="card">
+                <h2>2. Slide In</h2>
+                <div class="demo-box slide-in">Slide</div>
+                <p>Moves element from left to right</p>
+            </div>
+
+            <div class="card">
+                <h2>3. Bounce</h2>
+                <div class="demo-box bounce">Bounce</div>
+                <p>Creates a bouncing effect vertically</p>
+            </div>
+
+            <div class="card">
+                <h2>4. Rotate</h2>
+                <div class="demo-box rotate">Spin</div>
+                <p>Continuous 360-degree rotation</p>
+            </div>
+
+            <div class="card">
+                <h2>5. Pulse/Scale</h2>
+                <div class="demo-box pulse">Pulse</div>
+                <p>Grows and shrinks rhythmically</p>
+            </div>
+
+            <div class="card">
+                <h2>6. Shake</h2>
+                <div class="demo-box shake">Shake</div>
+                <p>Rapid horizontal movement</p>
+            </div>
+
+            <div class="card">
+                <h2>7. Flip</h2>
+                <div class="demo-box flip">Flip</div>
+                <p>3D rotation along Y-axis</p>
+            </div>
+
+            <div class="card">
+                <h2>8. Color Change</h2>
+                <div class="demo-box color-change">Colors</div>
+                <p>Cycles through different gradients</p>
+            </div>
+
+            <div class="card">
+                <h2>9. Glow</h2>
+                <div class="demo-box glow">Glow</div>
+                <p>Pulsating shadow effect</p>
+            </div>
+
+            <div class="card">
+                <h2>10. Swing</h2>
+                <div class="demo-box swing">Swing</div>
+                <p>Pendulum-like rotation</p>
+            </div>
+
+            <div class="card">
+                <h2>11. Zoom In/Out</h2>
+                <div class="demo-box zoom">Zoom</div>
+                <p>Scales between small and large</p>
+            </div>
+
+            <div class="card">
+                <h2>12. Hover Effect</h2>
+                <div class="demo-box">Hover Me!</div>
+                <p>Try hovering over any card!</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
