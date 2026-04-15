@@ -448,6 +448,36 @@ while queue:
 ```
 
 ```python
+# dijkstra
+def dijkstra(graph, start):
+    # graph = {node: [(neighbor, weight), ...]}
+
+    # Step 1: initialize distances
+    dist = {node: float('inf') for node in graph}
+    dist[start] = 0
+
+    # Step 2: min-heap (distance, node)
+    pq = [(0, start)]
+
+    while pq:
+        curr_dist, node = heapq.heappop(pq)
+
+        # Skip outdated entries
+        if curr_dist > dist[node]:
+            continue
+
+        # Step 3: relax edges
+        for neighbor, weight in graph[node]:
+            new_dist = curr_dist + weight
+
+            if new_dist < dist[neighbor]:
+                dist[neighbor] = new_dist
+                heapq.heappush(pq, (new_dist, neighbor))
+
+    return dist
+```
+
+```python
 # Connected components
 # time = O(V + E); space = O(V)
 n = number of nodes in graph
