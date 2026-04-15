@@ -419,6 +419,12 @@ while queue:
 - "Clone graph" → DFS/BFS with HashMap
 
 **Pseudo-pattern:**
+2D -> 1D = (index = r \* n + c)
+1D -> 2D :
+r = index / n
+c = index % n
+
+n = number of numCols
 
 ```python
 # DFS on graph
@@ -439,7 +445,94 @@ while queue:
         if neighbor not in visited:
             visited.add(neighbor)
             queue.append((neighbor, dist + 1))
+```
 
+```python
+# Connected components
+# time = O(V + E); space = O(V)
+n = number of nodes in graph
+g = adjacency list representing graph
+count = 0
+components: list[int] = [] # size n
+visited = [False,...,False] # size n
+findComponents():
+    for i in range(n: number of nodes):
+        if not visited[i]:
+            count++
+            dfs(i)
+    return (count, components)
+dfs(at):
+    visited[at] = true
+    components[at] = count
+    for (next: g[at]):
+        if not visited[next]:
+            dfs(at)
+```
+
+```python
+Shortest path BFS
+R, C = # R = number of rows, C = numbers of columns
+m = # Input character matrix of size R xC
+sr, sc = # 'S' symbol row and column values
+rq, cq = # Empty Row Queue (RQ) and Column Queue (CQ)
+
+# Variables used to track the number of steps taken
+move_count = 0
+nodes_left_in_layer = 1
+nodes_in_next_layer = 0
+
+# Variable used to track whether the 'E' character ever gets reached during BFS
+reached_end = False
+
+# R x C matrix of false values used to track whether the node at position (i, j) has been visited
+
+visited = ...
+
+# North, south, east, west direction vectors
+dr = [-1, 1, 0, 0]
+dc = [0, 0, 1, -1]
+
+
+solve():
+    rq.enqueue(sr)
+    cq.enqueue(sc)
+    visited[sr][sc] = true
+    while rq.size() > 0:
+        r = rq.dequeue()
+        c = cq.dequeue()
+        if m[r][c] == 'E':
+            reached_end = true
+            break
+        explore_neighbours(r, c) # just adds valid neighbors to queue
+        nodes_left_in_layer--
+        if nodes_left_in_layer == 0:
+            nodes_in_next_layer = nodes_in_next_layer
+            nodes_in_next_layer = 0
+            move_count++
+    if reached_end:
+        return move_count
+    return -1
+
+explore_neighbours(r, c):
+    for(i = 0; i < 4; i++):
+        rr = r + dr[i]
+        cc = c + dc[i]
+
+        # Skip out of bounds locations
+        if rr < 0 or cc < 0: continue
+        if rr >= R or cc >= C: continue
+
+        # Skip visited locations or blocked cells
+        if visited[rr][cc]: continue
+        if m[rr][cc] == '#': continue
+
+        rq.enqueue(rr)
+        cq.enqueue(cc)
+        visited[rr][cc] = True
+        nodes_in_next_layer++
+```
+
+```python
 # Topological Sort (Kahn's BFS)
 indegree = count incoming edges for each node
 queue = [nodes with indegree 0]
@@ -459,6 +552,507 @@ if len(order) != num_nodes: cycle exists
 - Forgetting visited set (infinite loops)
 - Wrong adjacency list building
 - Not handling disconnected components
+
+**Graph common patterns**
+
+# Graph Algorithm Patterns — Complete Reference
+
+---
+
+## 1. BFS (Breadth-First Search)
+
+**When to use:** Finding the shortest path in an **unweighted** graph, level-order traversal, finding all nodes within a certain distance, or any problem where you need to explore neighbours layer by layer. If a problem says "minimum number of steps/moves/transformations", BFS is almost always the answer.
+
+**Complexity:** O(V + E) time, O(V) space
+
+```python
+BFS(graph, start):
+    queue = [start]
+    visited = {start}
+    while queue:
+        node = queue.popleft()
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
+```
+
+**Common variations:**
+
+- **Multi-source BFS:** Push all sources into the queue at the start (e.g. "distance from any gate" problems).
+- **0-1 BFS:** Use a deque; push weight-0 edges to front, weight-1 edges to back. Replaces Dijkstra when weights are only 0 or 1.
+
+---
+
+## 2. DFS (Depth-First Search)
+
+**When to use:** Exploring all paths, detecting cycles, topological sorting, finding connected components, solving maze/backtracking problems, or any scenario where you need to go as deep as possible before backtracking. Preferred over BFS when you need to explore entire branches (e.g. "count all paths", "does a path exist").
+
+**Complexity:** O(V + E) time, O(V) space (recursion stack)
+
+```python
+DFS(graph, node, visited):
+    visited.add(node)
+    for neighbor in graph[node]:
+        if neighbor not in visited:
+            DFS(graph, neighbor, visited)
+```
+
+**Iterative version (avoids stack overflow):**
+
+```python
+DFS_Iterative(graph, start):
+    stack = [start]
+    visited = set()
+    while stack:
+        node = stack.pop()
+        if node in visited: continue
+        visited.add(node)
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                stack.append(neighbor)
+```
+
+---
+
+## 3. Dijkstra's Algorithm
+
+**When to use:** Shortest path from a single source in a graph with **non-negative** weights. The go-to algorithm whenever edges have varying positive costs (e.g. road networks, weighted grids, minimum cost problems). Will not work correctly if any edge weight is negative.
+
+**Complexity:** O((V + E) log V) with a binary heap
+
+```python
+Dijkstra(graph, start):
+    dist = {node: INF for all nodes}
+    dist[start] = 0
+    pq = [(0, start)]                  // min-heap: (distance, node)
+    while pq:
+        d, u = heappop(pq)
+        if d > dist[u]: continue        // stale entry, skip
+        for v, weight in graph[u]:
+            if dist[u] + weight < dist[v]:
+                dist[v] = dist[u] + weight
+                heappush(pq, (dist[v], v))
+    return dist
+```
+
+**Key insight:** The `if d > dist[u]: continue` line is the lazy deletion optimisation — it avoids needing a decrease-key operation.
+
+---
+
+## 4. Bellman-Ford Algorithm
+
+**When to use:** Shortest path from a single source when **negative edge weights** exist. Also the standard way to detect **negative weight cycles**. Slower than Dijkstra, so only use it when negatives are possible. Common in problems involving currency exchange, arbitrage detection, or constraint-based shortest paths.
+
+**Complexity:** O(V × E)
+
+```python
+BellmanFord(graph, start, V):
+    dist = {node: INF for all nodes}
+    dist[start] = 0
+    repeat V - 1 times:
+        for each edge (u, v, weight):
+            if dist[u] + weight < dist[v]:
+                dist[v] = dist[u] + weight
+    // Negative cycle detection (optional extra pass)
+    for each edge (u, v, weight):
+        if dist[u] + weight < dist[v]:
+            return "Negative cycle exists"
+    return dist
+```
+
+---
+
+## 5. Floyd-Warshall Algorithm
+
+**When to use:** Finding shortest paths between **all pairs** of vertices. Best when V is small (≤ 400–500) because of O(V³) complexity. Use it when you need to answer many "what's the distance from A to B?" queries, or for transitive closure problems. Also handles negative weights (but not negative cycles).
+
+**Complexity:** O(V³) time, O(V²) space
+
+```python
+FloydWarshall(V, edges):
+    dist[i][j] = INF for all i, j
+    dist[i][i] = 0 for all i
+    for each edge (u, v, w):
+        dist[u][v] = w
+    for k in 0..V-1:           // k = intermediate node
+        for i in 0..V-1:
+            for j in 0..V-1:
+                dist[i][j] = min(dist[i][j],
+                                 dist[i][k] + dist[k][j])
+```
+
+**Key insight:** The outermost loop must be `k` (the intermediate node). Getting the loop order wrong is the most common mistake.
+
+---
+
+## 6. Topological Sort
+
+**When to use:** Ordering tasks/nodes in a **Directed Acyclic Graph (DAG)** such that for every edge u → v, u comes before v. Classic for dependency resolution (build systems, course prerequisites, task scheduling). Also used to detect cycles in directed graphs — if the topological order doesn't include all nodes, a cycle exists.
+
+**Complexity:** O(V + E)
+
+```python
+// Kahn's Algorithm (BFS-based, preferred for interview clarity)
+TopSort(graph, V):
+    indegree = count incoming edges per node
+    queue = [nodes where indegree == 0]
+    order = []
+    while queue:
+        u = queue.popleft()
+        order.append(u)
+        for v in graph[u]:
+            indegree[v] -= 1
+            if indegree[v] == 0:
+                queue.append(v)
+    if len(order) != V: "Cycle exists — not a DAG"
+    return order
+```
+
+**DFS-based alternative:** Run DFS and append to result in post-order, then reverse. Useful when you're already doing DFS for something else.
+
+---
+
+## 7. Cycle Detection
+
+**When to use:** Determining whether a graph contains a cycle. The approach differs for directed vs undirected graphs. In directed graphs, use DFS with 3-colour marking (WHITE/GRAY/BLACK). In undirected graphs, a simple DFS with parent tracking or Union-Find works.
+
+### Directed Graph (DFS 3-Colouring)
+
+```python
+HasCycle(graph):
+    color = {node: WHITE for all nodes}
+    for node in graph:
+        if color[node] == WHITE:
+            if DFS(node): return True
+    return False
+
+DFS(u):
+    color[u] = GRAY                    // currently in recursion stack
+    for v in graph[u]:
+        if color[v] == GRAY: return True    // back edge = cycle
+        if color[v] == WHITE and DFS(v):
+            return True
+    color[u] = BLACK                   // fully processed
+    return False
+```
+
+### Undirected Graph (Union-Find)
+
+```python
+HasCycleUndirected(edges, V):
+    initialise Union-Find for V nodes
+    for u, v in edges:
+        if Find(u) == Find(v): return True   // same component = cycle
+        Union(u, v)
+    return False
+```
+
+---
+
+## 8. Union-Find (Disjoint Set Union)
+
+**When to use:** Dynamically tracking connected components, detecting cycles in undirected graphs, Kruskal's MST, or any problem that asks "are X and Y connected?" with incremental edge additions. Extremely efficient with path compression + union by rank — nearly O(1) amortised per operation.
+
+**Complexity:** O(α(n)) ≈ O(1) amortised per operation
+
+```python
+parent = [i for i in range(n)]
+rank = [0] * n
+
+Find(x):
+    if parent[x] != x:
+        parent[x] = Find(parent[x])       // path compression
+    return parent[x]
+
+Union(x, y):
+    px, py = Find(x), Find(y)
+    if px == py: return False              // already connected
+    if rank[px] < rank[py]: swap(px, py)   // union by rank
+    parent[py] = px
+    if rank[px] == rank[py]: rank[px] += 1
+    return True
+```
+
+---
+
+## 9. Kruskal's Algorithm (Minimum Spanning Tree)
+
+**When to use:** Finding the MST when you have an **edge list**. Particularly good when the graph is sparse or when edges are naturally given as a list (e.g. "connect N cities with minimum total cable"). Relies on Union-Find internally.
+
+**Complexity:** O(E log E) — dominated by the sort
+
+```python
+Kruskal(edges, V):
+    sort edges by weight ascending
+    initialise Union-Find for V nodes
+    mst_cost = 0
+    mst_edges = 0
+    for u, v, w in edges:
+        if Union(u, v):                // different components
+            mst_cost += w
+            mst_edges += 1
+            if mst_edges == V - 1: break
+    return mst_cost
+```
+
+---
+
+## 10. Prim's Algorithm (Minimum Spanning Tree)
+
+**When to use:** Finding the MST when you have an **adjacency list**, especially for dense graphs. Grows the MST from a starting node by always picking the cheapest edge crossing the cut. Preferred over Kruskal when the graph is dense (E ≈ V²) or when you already have adjacency list representation.
+
+**Complexity:** O((V + E) log V) with a binary heap
+
+```python
+Prim(graph, start):
+    visited = {start}
+    pq = [(w, start, v) for v, w in graph[start]]
+    heapify(pq)
+    mst_cost = 0
+    while pq and len(visited) < V:
+        w, u, v = heappop(pq)
+        if v in visited: continue
+        visited.add(v)
+        mst_cost += w
+        for next_v, next_w in graph[v]:
+            if next_v not in visited:
+                heappush(pq, (next_w, v, next_v))
+    return mst_cost
+```
+
+---
+
+## 11. Tarjan's Algorithm (Strongly Connected Components)
+
+**When to use:** Finding all **Strongly Connected Components** in a directed graph — maximal subsets of vertices where every vertex is reachable from every other. Used in compiler optimisation (dependency analysis), 2-SAT problems, and simplifying directed graphs into DAGs of SCCs.
+
+**Complexity:** O(V + E)
+
+```python
+Tarjan(graph):
+    idx = 0, stack = [], on_stack = set()
+    disc = {}, low = {}, sccs = []
+
+    DFS(u):
+        disc[u] = low[u] = idx++
+        stack.push(u)
+        on_stack.add(u)
+        for v in graph[u]:
+            if v not in disc:
+                DFS(v)
+                low[u] = min(low[u], low[v])
+            elif v in on_stack:
+                low[u] = min(low[u], disc[v])
+        // If u is root of an SCC
+        if low[u] == disc[u]:
+            scc = []
+            while True:
+                w = stack.pop()
+                on_stack.remove(w)
+                scc.append(w)
+                if w == u: break
+            sccs.append(scc)
+
+    for node in graph:
+        if node not in disc:
+            DFS(node)
+    return sccs
+```
+
+---
+
+## 12. Articulation Points & Bridges
+
+**When to use:** Finding **critical nodes** (articulation points) or **critical edges** (bridges) whose removal disconnects the graph. Used in network reliability analysis, identifying single points of failure, and connectivity problems. Only applicable to **undirected** graphs.
+
+**Complexity:** O(V + E)
+
+```python
+FindBridgesAndArticulationPoints(graph):
+    timer = 0
+    disc = {}, low = {}
+    bridges = [], points = set()
+
+    DFS(u, parent):
+        disc[u] = low[u] = timer++
+        children = 0
+        for v in graph[u]:
+            if v not in disc:
+                children += 1
+                DFS(v, u)
+                low[u] = min(low[u], low[v])
+                // Bridge: no back edge from v's subtree to u or above
+                if low[v] > disc[u]:
+                    bridges.append((u, v))
+                // Articulation point (non-root)
+                if parent != -1 and low[v] >= disc[u]:
+                    points.add(u)
+            elif v != parent:
+                low[u] = min(low[u], disc[v])
+        // Articulation point (root with 2+ children)
+        if parent == -1 and children > 1:
+            points.add(u)
+
+    for node in graph:
+        if node not in disc:
+            DFS(node, -1)
+    return bridges, points
+```
+
+**Key distinction:**
+
+- **Bridge:** `low[v] > disc[u]` (strictly greater — no way back to u at all)
+- **Articulation point:** `low[v] >= disc[u]` (no way back above u)
+
+---
+
+## 13. Bipartite Check (2-Colouring / Graph Colouring)
+
+**When to use:** Checking if a graph can be split into two groups where no two nodes in the same group share an edge. Equivalent to checking if the graph has no odd-length cycles. Used in matching problems, scheduling (two shifts), and determining if a graph is 2-colourable.
+
+**Complexity:** O(V + E)
+
+```python
+IsBipartite(graph):
+    color = {}
+    for node in graph:
+        if node in color: continue
+        queue = [node]
+        color[node] = 0
+        while queue:
+            u = queue.popleft()
+            for v in graph[u]:
+                if v not in color:
+                    color[v] = 1 - color[u]
+                    queue.append(v)
+                elif color[v] == color[u]:
+                    return False       // odd cycle found
+    return True
+```
+
+---
+
+## 14. Max Flow (Edmonds-Karp / BFS-based Ford-Fulkerson)
+
+**When to use:** Finding the maximum flow from a source to a sink in a flow network. Applies to problems involving: maximum matching in bipartite graphs, minimum cut (by Max-Flow Min-Cut theorem), edge-disjoint paths, resource allocation, and network capacity. If a problem involves "maximum number of X that can flow/be assigned", think max flow.
+
+**Complexity:** O(V × E²) for Edmonds-Karp
+
+```python
+MaxFlow(graph, source, sink):
+    build residual graph (copy of capacities)
+    max_flow = 0
+    while True:
+        // BFS to find augmenting path in residual graph
+        parent = BFS(residual, source, sink)
+        if no path found: break
+
+        // Find bottleneck along the path
+        path_flow = INF
+        v = sink
+        while v != source:
+            u = parent[v]
+            path_flow = min(path_flow, residual[u][v])
+            v = u
+
+        // Update residual capacities (forward & backward)
+        v = sink
+        while v != source:
+            u = parent[v]
+            residual[u][v] -= path_flow
+            residual[v][u] += path_flow
+            v = u
+
+        max_flow += path_flow
+    return max_flow
+```
+
+**Related:** Min-Cut = Max-Flow. After running max flow, nodes reachable from source in the residual graph form one side of the minimum cut.
+
+---
+
+## 15. A\* Search
+
+**When to use:** Shortest path when you have a **heuristic** function that estimates the remaining distance to the goal. Faster than Dijkstra because it prioritises nodes that look closer to the target. Common in grid pathfinding, game AI, and navigation. Requires an **admissible** heuristic (never overestimates) for optimality.
+
+**Complexity:** Depends on heuristic quality; worst case O((V + E) log V), best case much better than Dijkstra
+
+```python
+AStar(graph, start, goal, h):
+    g = {start: 0}                     // actual cost from start
+    pq = [(h(start), start)]           // priority = g + h (f-score)
+    parent = {}
+    while pq:
+        f, u = heappop(pq)
+        if u == goal:
+            return reconstruct_path(parent, goal)
+        for v, w in graph[u]:
+            tentative = g[u] + w
+            if tentative < g.get(v, INF):
+                g[v] = tentative
+                parent[v] = u
+                heappush(pq, (tentative + h(v), v))
+    return "No path"
+```
+
+**Common heuristics:**
+
+- **Grid with 4-directional movement:** Manhattan distance `|x1-x2| + |y1-y2|`
+- **Grid with 8-directional movement:** Chebyshev distance `max(|x1-x2|, |y1-y2|)`
+- **Euclidean space:** Straight-line distance
+
+---
+
+## Quick Reference Table
+
+| Problem                               | Algorithm                     | Key Condition                  |
+| ------------------------------------- | ----------------------------- | ------------------------------ |
+| Unweighted shortest path              | BFS                           | No weights or all weights = 1  |
+| Weighted shortest path (no negatives) | Dijkstra                      | Non-negative weights           |
+| Weighted shortest path (negatives OK) | Bellman-Ford                  | Negative weights possible      |
+| All-pairs shortest path               | Floyd-Warshall                | Small V (≤ ~500)               |
+| Minimum spanning tree (edge list)     | Kruskal                       | Sparse graph / edge list input |
+| Minimum spanning tree (adj list)      | Prim                          | Dense graph / adj list input   |
+| Task ordering / dependencies          | Topological Sort              | DAG only                       |
+| Cycle detection (directed)            | DFS 3-colouring               | Directed graph                 |
+| Cycle detection (undirected)          | Union-Find or DFS             | Undirected graph               |
+| Dynamic connectivity                  | Union-Find                    | Incremental edge additions     |
+| Strongly connected components         | Tarjan / Kosaraju             | Directed graph                 |
+| Critical nodes / edges                | Articulation Points / Bridges | Undirected graph               |
+| 2-colourability / odd cycle check     | Bipartite BFS                 | Undirected graph               |
+| Maximum flow / minimum cut            | Edmonds-Karp                  | Flow network with capacities   |
+| Heuristic-guided pathfinding          | A\*                           | Admissible heuristic available |
+
+---
+
+## Decision Flowchart
+
+```
+Is it a shortest path problem?
+├── Yes
+│   ├── Unweighted? → BFS
+│   ├── Weighted, no negatives? → Dijkstra
+│   ├── Negative weights? → Bellman-Ford
+│   ├── All pairs needed? → Floyd-Warshall
+│   └── Have a heuristic? → A*
+├── Minimum spanning tree?
+│   ├── Edge list? → Kruskal
+│   └── Adjacency list / dense? → Prim
+├── Ordering / scheduling?
+│   └── Topological Sort (check it's a DAG)
+├── Connectivity?
+│   ├── Static components → DFS / BFS
+│   ├── Dynamic (adding edges) → Union-Find
+│   └── Directed → Tarjan (SCCs)
+├── Cycle detection?
+│   ├── Directed → DFS 3-colouring or TopSort
+│   └── Undirected → Union-Find or DFS + parent
+├── Network flow / matching?
+│   └── Max Flow (Edmonds-Karp)
+└── Critical infrastructure?
+    └── Bridges / Articulation Points
+```
 
 ---
 
