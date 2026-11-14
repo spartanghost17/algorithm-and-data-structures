@@ -1,6 +1,357 @@
 # Complete DSA Patterns: Multiple Problems Per Pattern (C++)
 
+<a id="quick-navigation"></a>
+
+## Quick navigation
+
+- [0. C++ LANGUAGE & DATA STRUCTURE CHEAT SHEET](#section-0-c-plus-plus-language-and-data-structure-cheat-sheet)
+- [1. ARRAYS & HASHING](#section-1-arrays-and-hashing)
+- [2. TWO POINTERS](#section-2-two-pointers)
+- [3. SLIDING WINDOW](#section-3-sliding-window)
+- [4. BINARY SEARCH](#section-4-binary-search)
+- [5. STACKS](#section-5-stacks)
+- [6. QUEUES](#section-6-queues)
+- [7. LINKED LISTS](#section-7-linked-lists)
+- [8. TREES - DFS](#section-8-trees-dfs)
+- [9. TREES - BFS](#section-9-trees-bfs)
+- [10. GRAPHS - DFS](#section-10-graphs-dfs)
+- [11. GRAPHS - BFS (SHORTEST PATH)](#section-11-graphs-bfs-shortest-path)
+- [12. TOPOLOGICAL SORT](#section-12-topological-sort)
+- [13. HEAPS / PRIORITY QUEUE](#section-13-heaps-priority-queue)
+- [14. BACKTRACKING](#section-14-backtracking)
+- [15. ADVANCED GRAPH PATTERNS](#section-15-advanced-graph-patterns)
+- [Quick Reference: Pattern Selection](#section-quick-reference-pattern-selection)
+- [C++ Syntax Cheat Sheet](#section-c-plus-plus-syntax-cheat-sheet)
+
+
 ---
+
+<a id="section-0-c-plus-plus-language-and-data-structure-cheat-sheet"></a>
+
+# 0. C++ LANGUAGE & DATA STRUCTURE CHEAT SHEET
+
+## Imports, aliases, and basic syntax
+
+```cpp
+#include <algorithm>
+#include <array>
+#include <climits>
+#include <deque>
+#include <functional>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+using namespace std;
+
+long long solve(const vector<int>& nums) { // const reference avoids a copy
+    long long answer = 0;
+    return answer;
+}
+
+swap(left, right);
+const long long INF = LLONG_MAX / 4;
+```
+
+## Loops
+
+```cpp
+for (int index = 0; index < static_cast<int>(nums.size()); ++index) {
+    int value = nums[index];
+}
+
+for (int index = static_cast<int>(nums.size()) - 1; index >= 0; --index) {
+    int value = nums[index];
+}
+
+for (int value : nums) {          // copy each value
+}
+
+for (int& value : nums) {         // mutate each value
+    value *= 2;
+}
+
+for (const int& value : nums) {   // no copy, no mutation
+}
+
+for (auto [key, value] : mapping) {
+}
+
+for (auto iterator = seen.begin(); iterator != seen.end(); ) {
+    if (shouldRemove(*iterator)) iterator = seen.erase(iterator);
+    else ++iterator;
+}
+
+while (left <= right) {
+    ++left;
+}
+// break exits one loop; continue skips to its next iteration.
+```
+
+## Arrays and vectors
+
+```cpp
+int fixed[3] = {3, 1, 2};
+array<int, 3> saferFixed = {3, 1, 2};
+
+vector<int> nums = {3, 1, 2};
+vector<int> zeros(n, 0);
+vector<vector<int>> matrix(rows, vector<int>(cols, 0));
+
+nums.push_back(4);                    // append
+nums.emplace_back(5);                 // construct at end
+nums.insert(nums.begin() + index, 99);
+nums.insert(nums.end(), other.begin(), other.end());
+
+int last = nums.back();
+nums.pop_back();                      // removes; returns void
+nums.erase(nums.begin() + index);
+nums.erase(nums.begin() + from, nums.begin() + to);
+nums.clear();
+
+int value = nums[index];              // unchecked
+int checked = nums.at(index);         // throws if out of bounds
+bool empty = nums.empty();
+int size = nums.size();
+bool exists = find(nums.begin(), nums.end(), target) != nums.end();
+
+sort(nums.begin(), nums.end());
+sort(nums.rbegin(), nums.rend());
+reverse(nums.begin(), nums.end());
+fill(nums.begin(), nums.end(), -1);
+
+vector<int> copy = nums;
+vector<int> slice(nums.begin() + from, nums.begin() + to);
+
+// Remove all matching values: erase-remove idiom
+nums.erase(remove(nums.begin(), nums.end(), target), nums.end());
+```
+
+`vector<bool>` is bit-packed and returns proxy references; use `vector<char>` when normal reference behaviour matters.
+
+## Strings
+
+```cpp
+string text = "graph";
+int length = text.size();
+char character = text[index];
+string substring = text.substr(start, count);
+bool contains = text.find("rap") != string::npos;
+size_t position = text.find('a');             // string::npos if absent
+
+text.push_back('!');
+text += "s";
+text.insert(index, "X");
+text.erase(index, count);
+char last = text.back();
+text.pop_back();
+reverse(text.begin(), text.end());
+
+int number = stoi("42");
+long long large = stoll("42");
+string digits = to_string(42);
+```
+
+Strings are mutable in C++, but insert/erase in the middle is O(n).
+
+## Hash maps and ordered maps
+
+```cpp
+unordered_map<int, int> mapping;
+mapping[key] = value;                    // inserts default if key is absent
+mapping.insert({key, value});            // does not replace existing key
+mapping.emplace(key, value);
+mapping[key]++;
+
+bool exists = mapping.find(key) != mapping.end();
+int value = mapping.at(key);             // throws if absent
+int safe = mapping.find(key) == mapping.end() ? fallback : mapping.at(key);
+
+int removedCount = mapping.erase(key);   // 0 or 1
+mapping.clear();
+
+for (const auto& [key, value] : mapping) {
+}
+
+unordered_map<int, vector<int>> groups;
+groups[key].push_back(value);
+
+map<int, int> ordered;                   // sorted keys, O(log n)
+auto firstAtLeast = ordered.lower_bound(target);
+auto firstGreater = ordered.upper_bound(target);
+```
+
+Average `unordered_map` operations are O(1); `map` operations are O(log n). Since these guides target C++17 too, prefer `find(...) != end()` over `contains`.
+
+## Sets
+
+```cpp
+unordered_set<int> seen;
+seen.insert(value);
+seen.emplace(value);
+bool exists = seen.find(value) != seen.end();
+int removedCount = seen.erase(value);
+seen.clear();
+
+set<int> ordered;                        // unique + sorted
+ordered.insert(value);
+auto smallest = ordered.begin();
+auto largest = prev(ordered.end());
+auto firstAtLeast = ordered.lower_bound(target);
+```
+
+## Stack, queue, and deque
+
+```cpp
+stack<int> stackValues;
+stackValues.push(value);
+int top = stackValues.top();
+stackValues.pop();
+bool stackEmpty = stackValues.empty();
+
+queue<int> queueValues;
+queueValues.push(value);
+int front = queueValues.front();
+int back = queueValues.back();
+queueValues.pop();
+bool queueEmpty = queueValues.empty();
+
+deque<int> dequeValues;
+dequeValues.push_front(value);
+dequeValues.push_back(value);
+int first = dequeValues.front();
+int last = dequeValues.back();
+dequeValues.pop_front();
+dequeValues.pop_back();
+```
+
+C++ `pop()` operations return `void`; read `top()`, `front()`, or `back()` before removing.
+
+## Heap / priority_queue
+
+```cpp
+priority_queue<int> maxHeap;             // max-heap by default
+maxHeap.push(value);
+int largest = maxHeap.top();
+maxHeap.pop();
+
+priority_queue<int, vector<int>, greater<int>> minHeap;
+minHeap.push(value);
+int smallest = minHeap.top();
+
+using State = pair<long long, int>;       // distance, node
+priority_queue<State, vector<State>, greater<State>> byDistance;
+byDistance.push({distance, node});
+auto [bestDistance, nextNode] = byDistance.top();
+byDistance.pop();
+
+auto compare = [](const vector<int>& left, const vector<int>& right) {
+    return left[0] > right[0];            // greater priority value sinks
+};
+priority_queue<vector<int>, vector<vector<int>>, decltype(compare)> custom(compare);
+```
+
+Push/pop is O(log n); `top()` is O(1).
+
+## Pairs, tuples, and structured bindings
+
+```cpp
+pair<int, int> point = {row, col};
+int row = point.first;
+int col = point.second;
+auto [r, c] = point;
+
+tuple<int, int, int> state = {row, col, mask};
+auto [stateRow, stateCol, mask] = state;
+int first = get<0>(state);
+```
+
+Pairs and tuples compare lexicographically, which is useful in heaps and sorting.
+
+## Algorithms and binary search
+
+```cpp
+sort(nums.begin(), nums.end());
+auto found = find(nums.begin(), nums.end(), target);
+int total = accumulate(nums.begin(), nums.end(), 0);
+long long largeTotal = accumulate(nums.begin(), nums.end(), 0LL);
+int minimum = *min_element(nums.begin(), nums.end());
+int maximum = *max_element(nums.begin(), nums.end());
+
+bool exists = binary_search(nums.begin(), nums.end(), target);
+auto firstAtLeast = lower_bound(nums.begin(), nums.end(), target);
+auto firstGreater = upper_bound(nums.begin(), nums.end(), target);
+int index = lower_bound(nums.begin(), nums.end(), target) - nums.begin();
+
+sort(pairs.begin(), pairs.end(), [](const auto& left, const auto& right) {
+    if (left.second != right.second) return left.second < right.second;
+    return left.first < right.first;
+});
+```
+
+Binary-search algorithms require sorted input.
+
+## Linked structures and graphs
+
+```cpp
+struct ListNode {
+    int val;
+    ListNode* next;
+    explicit ListNode(int value) : val(value), next(nullptr) {}
+};
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    explicit TreeNode(int value) : val(value), left(nullptr), right(nullptr) {}
+};
+
+vector<vector<int>> graph(n);
+for (const auto& edge : edges) {
+    int first = edge[0], second = edge[1];
+    graph[first].push_back(second);
+    graph[second].push_back(first);        // omit for directed graph
+}
+
+vector<vector<pair<int, int>>> weighted(n);
+weighted[source].push_back({target, weight});
+
+vector<char> visited(n, false);
+int directions4[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+```
+
+## Interview traps
+
+- Use `long long` for accumulated sums, products, distances, and comparator keys.
+- Avoid unsigned underflow: `size() - 1` is dangerous when a container is empty; cast after checking or use reverse iterators.
+- Inserting into a vector can invalidate iterators, pointers, and references when it reallocates.
+- `unordered_map[key]` mutates the map when the key is missing; use `find` for a read-only check.
+- Pass large inputs as `const T&`; pass as `T&` only when mutation is intended.
+- Prefer RAII containers and smart pointers to raw `new`/`delete` in interview code.
+
+## Complexity reminders
+
+| Structure | Add | Remove | Membership / lookup | Peek |
+| --------- | --- | ------ | ------------------- | ---- |
+| `vector` end | O(1)* | O(1) | O(n), index O(1) | O(1) |
+| `vector` middle | O(n) | O(n) | O(n) | O(1) |
+| `unordered_map/set` average | O(1) | O(1) | O(1) | — |
+| `map/set` | O(log n) | O(log n) | O(log n) | O(log n) |
+| `deque` ends | O(1) | O(1) | O(n), index O(1) | O(1) |
+| `priority_queue` | O(log n) | O(log n) | O(n) | O(1) |
+
+*Amortised.
+
+---
+
+
+<a id="section-1-arrays-and-hashing"></a>
 
 # 1. ARRAYS & HASHING
 
@@ -178,6 +529,8 @@ int subarraySum(vector<int>& nums, int k) {
 
 ---
 
+<a id="section-2-two-pointers"></a>
+
 # 2. TWO POINTERS
 
 ---
@@ -311,6 +664,8 @@ void moveZeroes(vector<int>& nums) {
 **Intuition:** Swap non-zero elements to the front. Zeroes naturally end up at the back.
 
 ---
+
+<a id="section-3-sliding-window"></a>
 
 # 3. SLIDING WINDOW
 
@@ -469,6 +824,8 @@ string minWindow(string s, string t) {
 **Intuition:** Expand until valid. Then shrink while still valid, tracking minimum.
 
 ---
+
+<a id="section-4-binary-search"></a>
 
 # 4. BINARY SEARCH
 
@@ -642,6 +999,8 @@ bool canFinish(vector<int>& piles, int speed, int h) {
 
 ---
 
+<a id="section-5-stacks"></a>
+
 # 5. STACKS
 
 ---
@@ -785,6 +1144,8 @@ public:
 
 ---
 
+<a id="section-6-queues"></a>
+
 # 6. QUEUES
 
 ---
@@ -887,6 +1248,8 @@ vector<int> maxSlidingWindow(vector<int>& nums, int k) {
 **Intuition:** Monotonic deque keeps potential maxes in decreasing order. Front is always max.
 
 ---
+
+<a id="section-7-linked-lists"></a>
 
 # 7. LINKED LISTS
 
@@ -1004,6 +1367,8 @@ ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
 
 ---
 
+<a id="section-8-trees-dfs"></a>
+
 # 8. TREES - DFS
 
 ---
@@ -1083,6 +1448,8 @@ void dfs(TreeNode* node, int remaining, vector<int>& path, vector<vector<int>>& 
 
 ---
 
+<a id="section-9-trees-bfs"></a>
+
 # 9. TREES - BFS
 
 ---
@@ -1145,6 +1512,8 @@ vector<int> rightSideView(TreeNode* root) {
 ```
 
 ---
+
+<a id="section-10-graphs-dfs"></a>
 
 # 10. GRAPHS - DFS
 
@@ -1215,6 +1584,8 @@ Node* dfs(Node* node, unordered_map<Node*, Node*>& cloned) {
 ```
 
 ---
+
+<a id="section-11-graphs-bfs-shortest-path"></a>
 
 # 11. GRAPHS - BFS (SHORTEST PATH)
 
@@ -1297,6 +1668,8 @@ int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
 
 ---
 
+<a id="section-12-topological-sort"></a>
+
 # 12. TOPOLOGICAL SORT
 
 ---
@@ -1371,6 +1744,8 @@ vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
 ```
 
 ---
+
+<a id="section-13-heaps-priority-queue"></a>
 
 # 13. HEAPS / PRIORITY QUEUE
 
@@ -1467,6 +1842,8 @@ public:
 ```
 
 ---
+
+<a id="section-14-backtracking"></a>
 
 # 14. BACKTRACKING
 
@@ -1640,6 +2017,394 @@ void backtrack(int row, int n, vector<string>& board, unordered_set<int>& cols,
 
 ---
 
+<a id="section-15-advanced-graph-patterns"></a>
+
+# 15. ADVANCED GRAPH PATTERNS
+
+| Signal | Algorithm | Complexity |
+| ------ | --------- | ---------- |
+| Unweighted / many-source shortest path | BFS / multi-source BFS | O(V + E) |
+| Edge weights only 0 or 1 | 0-1 BFS | O(V + E) |
+| Non-negative weighted shortest path | Dijkstra | O((V + E) log V) |
+| Negative edges or at most K edges | Bellman-Ford | O(VE), or O(KE) |
+| Repeated merges / connectivity | Union-Find | Almost O(1) per operation |
+| Minimum total connection cost | Kruskal / Prim MST | O(E log E) / O(E log V) |
+| Critical edges | Tarjan low-link | O(V + E) |
+| Use every edge exactly once | Hierholzer | O(E) plus edge ordering |
+| Node plus keys/stops/resources | BFS/Dijkstra on full state | Depends on state count |
+
+---
+
+## Pattern 15A: Dijkstra - Non-Negative Weighted Shortest Path
+
+### Problem: Network Delay Time
+
+```cpp
+int networkDelayTime(vector<vector<int>>& times, int n, int start) {
+    vector<vector<pair<int, int>>> graph(n + 1);
+    for (const auto& edge : times) {
+        graph[edge[0]].push_back({edge[1], edge[2]});
+    }
+
+    const long long INF = LLONG_MAX / 4;
+    vector<long long> distance(n + 1, INF);
+    distance[start] = 0;
+
+    using State = pair<long long, int>; // distance, node
+    priority_queue<State, vector<State>, greater<State>> minHeap;
+    minHeap.push({0, start});
+
+    while (!minHeap.empty()) {
+        auto [currentDistance, node] = minHeap.top();
+        minHeap.pop();
+        if (currentDistance != distance[node]) continue; // stale entry
+
+        for (auto [neighbour, weight] : graph[node]) {
+            long long candidate = currentDistance + weight;
+            if (candidate < distance[neighbour]) {
+                distance[neighbour] = candidate;
+                minHeap.push({candidate, neighbour});
+            }
+        }
+    }
+
+    long long answer = *max_element(distance.begin() + 1, distance.end());
+    return answer == INF ? -1 : static_cast<int>(answer);
+}
+```
+
+**Invariant:** the current best heap removal is final with non-negative weights. Never mark a node visited merely when it enters the heap.
+
+---
+
+## Pattern 15B: 0-1 BFS - Binary Edge Weights
+
+### Problem: Minimum Obstacle Removal to Reach Corner
+
+```cpp
+int minimumObstacles(vector<vector<int>>& grid) {
+    int rows = grid.size(), cols = grid[0].size();
+    vector<vector<int>> distance(rows, vector<int>(cols, INT_MAX));
+    deque<pair<int, int>> worklist;
+    distance[0][0] = 0;
+    worklist.push_front({0, 0});
+    int directions[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+
+    while (!worklist.empty()) {
+        auto [row, col] = worklist.front();
+        worklist.pop_front();
+
+        for (auto& direction : directions) {
+            int nextRow = row + direction[0], nextCol = col + direction[1];
+            if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) continue;
+
+            int weight = grid[nextRow][nextCol];
+            int candidate = distance[row][col] + weight;
+            if (candidate >= distance[nextRow][nextCol]) continue;
+
+            distance[nextRow][nextCol] = candidate;
+            if (weight == 0) worklist.push_front({nextRow, nextCol});
+            else worklist.push_back({nextRow, nextCol});
+        }
+    }
+    return distance[rows - 1][cols - 1];
+}
+```
+
+Zero-cost edges go to the front and cost-one edges to the back, maintaining Dijkstra's order in O(V + E).
+
+---
+
+## Pattern 15C: Bellman-Ford by Layers - Bounded Stops
+
+### Problem: Cheapest Flights Within K Stops
+
+```cpp
+int findCheapestPrice(
+    int n, vector<vector<int>>& flights, int source, int target, int k
+) {
+    const long long INF = LLONG_MAX / 4;
+    vector<long long> cost(n, INF);
+    cost[source] = 0;
+
+    for (int edgesUsed = 0; edgesUsed <= k; ++edgesUsed) {
+        vector<long long> nextCost = cost;
+        for (const auto& flight : flights) {
+            int from = flight[0], to = flight[1], price = flight[2];
+            if (cost[from] != INF) {
+                nextCost[to] = min(nextCost[to], cost[from] + price);
+            }
+        }
+        cost.swap(nextCost);
+    }
+    return cost[target] == INF ? -1 : static_cast<int>(cost[target]);
+}
+```
+
+**Critical detail:** read from the old layer and write to the new one. In-place relaxation may use too many edges in one round.
+
+---
+
+## Pattern 15D: Union-Find - Dynamic Connectivity
+
+### Problem: Redundant Connection
+
+```cpp
+class UnionFind {
+    vector<int> parent;
+    vector<int> componentSize;
+
+public:
+    explicit UnionFind(int n) : parent(n), componentSize(n, 1) {
+        iota(parent.begin(), parent.end(), 0);
+    }
+
+    int find(int node) {
+        if (parent[node] != node) parent[node] = find(parent[node]);
+        return parent[node];
+    }
+
+    bool unite(int first, int second) {
+        int rootFirst = find(first), rootSecond = find(second);
+        if (rootFirst == rootSecond) return false;
+        if (componentSize[rootFirst] < componentSize[rootSecond]) swap(rootFirst, rootSecond);
+        parent[rootSecond] = rootFirst;
+        componentSize[rootFirst] += componentSize[rootSecond];
+        return true;
+    }
+};
+
+vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+    UnionFind unionFind(edges.size() + 1);
+    for (const auto& edge : edges) {
+        if (!unionFind.unite(edge[0], edge[1])) return edge;
+    }
+    return {};
+}
+```
+
+An edge whose endpoints already share a root closes an undirected cycle. Path compression and union by size are near constant amortised time.
+
+---
+
+## Pattern 15E: Prim's Minimum Spanning Tree
+
+### Problem: Min Cost to Connect All Points
+
+```cpp
+int minCostConnectPoints(vector<vector<int>>& points) {
+    int n = points.size();
+    vector<bool> inTree(n, false);
+    using Edge = pair<int, int>; // cost, destination
+    priority_queue<Edge, vector<Edge>, greater<Edge>> minHeap;
+    minHeap.push({0, 0});
+
+    int totalCost = 0, used = 0;
+    while (used < n) {
+        auto [cost, point] = minHeap.top();
+        minHeap.pop();
+        if (inTree[point]) continue;
+
+        inTree[point] = true;
+        totalCost += cost;
+        ++used;
+
+        for (int neighbour = 0; neighbour < n; ++neighbour) {
+            if (!inTree[neighbour]) {
+                int distance = abs(points[point][0] - points[neighbour][0])
+                    + abs(points[point][1] - points[neighbour][1]);
+                minHeap.push({distance, neighbour});
+            }
+        }
+    }
+    return totalCost;
+}
+```
+
+MST minimises total network cost; Dijkstra minimises distances from one source. They are not interchangeable.
+
+---
+
+## Pattern 15F: Bipartite Graph - Two-Colouring
+
+```cpp
+bool isBipartite(vector<vector<int>>& graph) {
+    vector<int> colour(graph.size(), -1);
+
+    for (int start = 0; start < static_cast<int>(graph.size()); ++start) {
+        if (colour[start] != -1) continue;
+        queue<int> nodes;
+        nodes.push(start);
+        colour[start] = 0;
+
+        while (!nodes.empty()) {
+            int node = nodes.front();
+            nodes.pop();
+            for (int neighbour : graph[node]) {
+                if (colour[neighbour] == -1) {
+                    colour[neighbour] = colour[node] ^ 1;
+                    nodes.push(neighbour);
+                } else if (colour[neighbour] == colour[node]) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+```
+
+Every edge must cross colours. Looping over all starts handles disconnected graphs; a conflict is an odd cycle.
+
+---
+
+## Pattern 15G: Tarjan Low-Link - Bridges
+
+```cpp
+class BridgeFinder {
+    vector<vector<pair<int, int>>> graph; // neighbour, edge ID
+    vector<int> discovery;
+    vector<int> low;
+    vector<vector<int>> bridges;
+    int timer = 0;
+
+    void dfs(int node, int parentEdge) {
+        discovery[node] = low[node] = timer++;
+        for (auto [neighbour, edgeId] : graph[node]) {
+            if (edgeId == parentEdge) continue;
+            if (discovery[neighbour] == -1) {
+                dfs(neighbour, edgeId);
+                low[node] = min(low[node], low[neighbour]);
+                if (low[neighbour] > discovery[node]) bridges.push_back({node, neighbour});
+            } else {
+                low[node] = min(low[node], discovery[neighbour]);
+            }
+        }
+    }
+
+public:
+    vector<vector<int>> criticalConnections(int n, vector<vector<int>>& connections) {
+        bridges.clear();
+        timer = 0;
+        graph.assign(n, {});
+        discovery.assign(n, -1);
+        low.resize(n);
+        for (int edgeId = 0; edgeId < static_cast<int>(connections.size()); ++edgeId) {
+            int first = connections[edgeId][0], second = connections[edgeId][1];
+            graph[first].push_back({second, edgeId});
+            graph[second].push_back({first, edgeId});
+        }
+        for (int node = 0; node < n; ++node) {
+            if (discovery[node] == -1) dfs(node, -1);
+        }
+        return bridges;
+    }
+};
+```
+
+`low[v] > discovery[u]` means the DFS subtree at `v` cannot bypass edge `u-v`. Parent edge IDs make the template safe for parallel edges.
+
+---
+
+## Pattern 15H: State-Space BFS - Node Plus Bitmask
+
+### Problem: Shortest Path to Get All Keys
+
+```cpp
+int shortestPathAllKeys(vector<string>& grid) {
+    int rows = grid.size(), cols = grid[0].size();
+    int startRow = 0, startCol = 0, allKeys = 0;
+    for (int row = 0; row < rows; ++row) {
+        for (int col = 0; col < cols; ++col) {
+            char cell = grid[row][col];
+            if (cell == '@') startRow = row, startCol = col;
+            else if (cell >= 'a' && cell <= 'f') allKeys |= 1 << (cell - 'a');
+        }
+    }
+
+    queue<tuple<int, int, int>> worklist;
+    worklist.push({startRow, startCol, 0});
+    vector visited(rows, vector(cols, vector<bool>(64, false)));
+    visited[startRow][startCol][0] = true;
+    int directions[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    int steps = 0;
+
+    while (!worklist.empty()) {
+        int levelSize = worklist.size();
+        while (levelSize--) {
+            auto [row, col, keys] = worklist.front();
+            worklist.pop();
+            if (keys == allKeys) return steps;
+
+            for (auto& direction : directions) {
+                int nextRow = row + direction[0], nextCol = col + direction[1];
+                if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) continue;
+                char cell = grid[nextRow][nextCol];
+                if (cell == '#') continue;
+                int nextKeys = keys;
+                if (cell >= 'a' && cell <= 'f') nextKeys |= 1 << (cell - 'a');
+                if (cell >= 'A' && cell <= 'F' && !(keys & (1 << (cell - 'A')))) continue;
+                if (!visited[nextRow][nextCol][nextKeys]) {
+                    visited[nextRow][nextCol][nextKeys] = true;
+                    worklist.push({nextRow, nextCol, nextKeys});
+                }
+            }
+        }
+        ++steps;
+    }
+    return -1;
+}
+```
+
+The real vertex is `(row, col, keys)`, not just `(row, col)`. The full state determines future legal moves.
+
+---
+
+## Pattern 15I: Eulerian Path - Use Every Edge Once
+
+### Problem: Reconstruct Itinerary
+
+```cpp
+vector<string> findItinerary(vector<vector<string>>& tickets) {
+    unordered_map<string, priority_queue<string, vector<string>, greater<string>>> graph;
+    for (const auto& ticket : tickets) graph[ticket[0]].push(ticket[1]);
+    vector<string> route;
+
+    function<void(const string&)> visit = [&](const string& airport) {
+        auto& destinations = graph[airport];
+        while (!destinations.empty()) {
+            string next = destinations.top();
+            destinations.pop();
+            visit(next);
+        }
+        route.push_back(airport);
+    };
+
+    visit("JFK");
+    reverse(route.begin(), route.end());
+    return route;
+}
+```
+
+Hierholzer appends a node after consuming its outgoing edges, so the route is built backwards. Eulerian means every **edge** once; Hamiltonian means every **vertex** once.
+
+---
+
+## Advanced Graph Interview Checklist
+
+1. Define the real vertex and edge, including hidden state.
+2. Match edge weights to BFS, 0-1 BFS, Dijkstra, Bellman-Ford, or DAG relaxation.
+3. Cover every disconnected component where required.
+4. Skip stale Dijkstra entries and mark ordinary BFS states on enqueue.
+5. Distinguish MST total cost from single-source shortest paths.
+6. Give complexity in V and E—or in the expanded number of states.
+
+**Next drills:** Accounts Merge, Swim in Rising Water, Alien Dictionary, Network Delay Time, Min Cost to Connect All Points, Critical Connections, Reconstruct Itinerary, and Shortest Path to Get All Keys.
+
+---
+
+<a id="section-quick-reference-pattern-selection"></a>
+
 # Quick Reference: Pattern Selection
 
 | Keywords                        | Pattern                              |
@@ -1666,10 +2431,20 @@ void backtrack(int row, int n, vector<string>& board, unordered_set<int>& cols,
 | "islands/connected"             | DFS flood fill                       |
 | "shortest path unweighted"      | BFS                                  |
 | "prerequisites/dependencies"    | Topological sort                     |
+| "weighted shortest path"        | Dijkstra                             |
+| "weights are only 0/1"          | 0-1 BFS                              |
+| "negative edges/at most k edges"| Bellman-Ford                         |
+| "merge groups/redundant edge"   | Union-Find                           |
+| "minimum total connection cost" | Minimum spanning tree                |
+| "critical connection"           | Tarjan low-link                      |
+| "use every edge exactly once"   | Eulerian path / Hierholzer           |
+| "node plus keys/stops/resources"| State-space graph                    |
 | "kth largest/merge k sorted"    | Heap                                 |
 | "all combinations/permutations" | Backtracking                         |
 
 ---
+
+<a id="section-c-plus-plus-syntax-cheat-sheet"></a>
 
 # C++ Syntax Cheat Sheet
 

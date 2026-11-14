@@ -1,5 +1,16 @@
 # Complete DSA Problem-to-Keyword Mapping
 
+<a id="quick-navigation"></a>
+
+## Quick navigation
+
+- [Master Reference Table](#section-master-reference-table)
+- [Quick Lookup: Keywords → Pattern](#section-quick-lookup-keywords-pattern)
+- [Pattern Subtypes Summary](#section-pattern-subtypes-summary)
+
+
+<a id="section-master-reference-table"></a>
+
 ## Master Reference Table
 
 | Category             | Pattern Type                       | Problem                                   | Keywords                                                                         | Core Intuition                                          |
@@ -119,6 +130,28 @@
 |                      | Multi-Source BFS                   | 01 Matrix                                 | "distance to nearest 0", "closest zero"                                          | Start BFS from all 0s simultaneously                    |
 |                      | Multi-Source BFS                   | Rotting Oranges                           | "infection spread", "simultaneous spread", "minimum time to infect all"          | All rotten oranges in queue initially                   |
 |                      | Layer by Layer                     | Minimum Knight Moves                      | "knight moves", "chess knight", "minimum moves"                                  | BFS with knight move offsets                            |
+|                      | Bidirectional BFS                  | Word Ladder                               | "shortest transformation", "known start and end", "huge search space"            | Expand the smaller frontier from both ends              |
+|                      | 0-1 BFS                            | Minimum Obstacle Removal                  | "edge weights are 0 or 1", "minimum reversals", "free or costly move"             | Deque: weight 0 to front, weight 1 to back              |
+|                      | State-Space BFS                    | Shortest Path to Get All Keys             | "keys and locks", "collect all", "state changes available moves"                  | Visit `(node, state)` rather than only `node`            |
+|                      |                                    |                                           |                                                                                  |                                                         |
+| **Weighted Graphs**  | Dijkstra                           | Network Delay Time                        | "weighted shortest path", "minimum cost/time", "non-negative weights"             | Min-heap; ignore stale entries                          |
+|                      | Dijkstra + State                   | Cheapest Flights Within K Stops           | "shortest path with stops/resources/coupons"                                       | Distance must include the extra state                   |
+|                      | Bellman-Ford                       | Cheapest Flights Within K Stops           | "negative weights", "at most k edges", "negative-cycle detection"                | Relax all edges from a snapshot                         |
+|                      | Floyd-Warshall                     | Find the City With Smallest Neighbors     | "all-pairs shortest paths", "every pair", "small graph"                          | Try every node as an intermediate                       |
+|                      | DAG Shortest/Longest Path          | Parallel Courses                          | "weighted DAG", "critical path", "longest dependency chain"                      | Topological order + edge relaxation                     |
+|                      |                                    |                                           |                                                                                  |                                                         |
+| **Union-Find / MST** | Dynamic Connectivity               | Number of Connected Components            | "merge groups", "online connectivity", "are these connected?"                    | DSU with path compression + union by size/rank          |
+|                      | Cycle Detection                    | Redundant Connection                      | "extra edge", "first edge that creates a cycle"                                  | Edge whose endpoints already share a root               |
+|                      | Kruskal MST                        | Min Cost to Connect All Points            | "minimum total cost to connect all", "edge list", "sparse graph"                  | Sort edges; union only different components             |
+|                      | Prim MST                           | Min Cost to Connect All Points            | "minimum spanning tree", "grow from one node", "dense graph"                      | Min-heap of cheapest crossing edges                     |
+|                      |                                    |                                           |                                                                                  |                                                         |
+| **Graph Structure**  | Bipartite / 2-Colouring            | Is Graph Bipartite?                       | "split into two groups", "no same-group neighbors", "odd cycle"                   | BFS/DFS colours; conflict means not bipartite           |
+|                      | Strongly Connected Components      | Critical Connections / SCC variant        | "mutually reachable", "strongly connected", "condense directed graph"             | Tarjan or Kosaraju                                      |
+|                      | Bridges                            | Critical Connections in a Network         | "critical edge", "disconnects if removed", "single point of failure"              | Tarjan low-link: `low[v] > tin[u]`                      |
+|                      | Articulation Points                | Critical Routers                          | "critical vertex", "network splits if removed"                                   | Low-link + DFS root special case                        |
+|                      | Eulerian Trail                     | Reconstruct Itinerary                     | "use every edge exactly once", "arrange tickets/pairs"                            | Hierholzer; append on backtrack                         |
+|                      | Tree LCA / Binary Lifting          | Kth Ancestor of a Tree Node               | "many ancestor/path queries", "kth ancestor", "LCA"                              | Precompute `2^j` ancestors                              |
+|                      | Max Flow / Matching                | Maximum Bipartite Matching                | "capacity", "maximum assignments", "disjoint pairings"                          | Residual graph; augmenting paths                        |
 |                      |                                    |                                           |                                                                                  |                                                         |
 | **Topological Sort** | Cycle Detection (Kahn's)           | Course Schedule                           | "can finish courses", "prerequisites possible", "detect cycle in prerequisites"  | Indegree 0 first; if can't process all, cycle exists    |
 |                      | Find Order (Kahn's)                | Course Schedule II                        | "order of courses", "valid sequence", "prerequisite order"                       | Record processing order during Kahn's                   |
@@ -157,6 +190,8 @@
 |                      | String Generation                  | Letter Combinations of Phone Number       | "phone number letters", "digit to letters", "t9 keyboard"                        | Map digits to letters, combine all                      |
 
 ---
+
+<a id="section-quick-lookup-keywords-pattern"></a>
 
 ## Quick Lookup: Keywords → Pattern
 
@@ -197,6 +232,16 @@
 | "word transformation"                         | BFS on word graph                     |
 | "prerequisites", "dependencies", "task order" | Topological sort                      |
 | "can finish all courses"                      | Topological sort (cycle detection)    |
+| "weighted shortest path", "minimum travel time" | Dijkstra (if weights are non-negative) |
+| "negative edge", "currency arbitrage"           | Bellman-Ford                          |
+| "all pairs", "distance between every pair"       | Floyd-Warshall                        |
+| "weights only 0 and 1", "minimum reversals"      | 0-1 BFS                               |
+| "merge groups", "redundant edge"                 | Union-Find                            |
+| "minimum cost to connect everything"              | Minimum Spanning Tree                 |
+| "critical connection", "bridge"                  | Tarjan low-link                       |
+| "mutually reachable", "strong component"         | SCC (Tarjan/Kosaraju)                 |
+| "use every edge exactly once"                     | Eulerian path (Hierholzer)            |
+| "collect keys", "remaining stops", "coupons"    | State-expanded graph                  |
 | "kth largest/smallest"                        | Heap of size k                        |
 | "merge k sorted"                              | Heap k-way merge                      |
 | "running median", "stream median"             | Two heaps                             |
@@ -209,7 +254,31 @@
 
 ---
 
+<a id="section-pattern-subtypes-summary"></a>
+
 ## Pattern Subtypes Summary
+
+### Graph Subtypes
+
+| Signal / Constraint | Reach For | State / Invariant | Typical Complexity |
+| ------------------- | --------- | ----------------- | ------------------ |
+| Unweighted shortest path | BFS | First visit is shortest | O(V + E) |
+| Many simultaneous sources | Multi-source BFS | Seed every source at distance 0 | O(V + E) |
+| Known start and target, huge branching | Bidirectional BFS | Expand the smaller frontier | Often far fewer states; worst O(V + E) |
+| Edge weights only 0/1 | 0-1 BFS | Deque holds nondecreasing distance | O(V + E) |
+| Non-negative weighted shortest path | Dijkstra | Finalised minimum heap distance | O((V + E) log V) |
+| Negative edges / bounded edge count | Bellman-Ford | Each pass permits one more edge | O(VE) |
+| All-pairs, small V | Floyd-Warshall | Intermediates restricted to first k nodes | O(V^3) |
+| Dependencies / DAG | Topological sort + DAG DP | Every predecessor processed first | O(V + E) |
+| Incremental undirected connectivity | Union-Find | One representative per component | O((V + E) alpha(V)) |
+| Minimum total connection cost | Kruskal or Prim | Add cheapest safe crossing edge | O(E log E) or O(E log V) |
+| Two incompatible groups / odd cycle | Bipartite colouring | Every edge crosses colours | O(V + E) |
+| Directed mutual reachability | SCC | Collapse each SCC into one DAG node | O(V + E) |
+| Critical undirected edge/node | Low-link DFS | Earliest reachable discovery time | O(V + E) |
+| Use every edge exactly once | Hierholzer | Consume each edge once; reverse postorder | O(E) |
+| Path problem plus keys/stops/mask | State-space graph | Visited key is the full state tuple | Depends on expanded state count |
+
+**The interview trap:** never mark only `node` as visited when future choices also depend on stops used, keys held, parity, direction, fuel, or a bitmask. The graph's true vertex is the entire state tuple.
 
 ### Two Pointers Subtypes
 

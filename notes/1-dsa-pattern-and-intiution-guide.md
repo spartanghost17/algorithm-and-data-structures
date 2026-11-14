@@ -1,6 +1,55 @@
 # DSA Interview Patterns & Intuition Guide
 
+<a id="quick-navigation"></a>
+
+## Quick navigation
+
+- [1. Arrays & Hashing](#section-1-arrays-and-hashing)
+- [2. Two Pointers](#section-2-two-pointers)
+- [3. Sliding Window](#section-3-sliding-window)
+- [4. Binary Search](#section-4-binary-search)
+- [5. Stacks](#section-5-stacks)
+- [6. Queues](#section-6-queues)
+- [7. Linked Lists](#section-7-linked-lists)
+- [8. Trees (BFS & DFS)](#section-8-trees-bfs-and-dfs)
+- [9. Graphs (BFS & DFS)](#section-9-graphs-bfs-and-dfs)
+- [Graph Algorithm Patterns — Complete Reference](#section-graph-algorithm-patterns-complete-reference)
+- [1. BFS (Breadth-First Search)](#section-1-bfs-breadth-first-search)
+- [2. DFS (Depth-First Search)](#section-2-dfs-depth-first-search)
+- [3. Dijkstra's Algorithm](#section-3-dijkstras-algorithm)
+- [4. Bellman-Ford Algorithm](#section-4-bellman-ford-algorithm)
+- [5. Floyd-Warshall Algorithm](#section-5-floyd-warshall-algorithm)
+- [6. Topological Sort](#section-6-topological-sort)
+- [7. Cycle Detection](#section-7-cycle-detection)
+- [8. Union-Find (Disjoint Set Union)](#section-8-union-find-disjoint-set-union)
+- [9. Kruskal's Algorithm (Minimum Spanning Tree)](#section-9-kruskals-algorithm-minimum-spanning-tree)
+- [10. Prim's Algorithm (Minimum Spanning Tree)](#section-10-prims-algorithm-minimum-spanning-tree)
+- [11. Tarjan's Algorithm (Strongly Connected Components)](#section-11-tarjans-algorithm-strongly-connected-components)
+- [12. Articulation Points & Bridges](#section-12-articulation-points-and-bridges)
+- [13. Bipartite Check (2-Colouring / Graph Colouring)](#section-13-bipartite-check-2-colouring-graph-colouring)
+- [14. Max Flow (Edmonds-Karp / BFS-based Ford-Fulkerson)](#section-14-max-flow-edmonds-karp-bfs-based-ford-fulkerson)
+- [15. A\* Search](#section-15-a-star-search)
+- [16. Multi-Source BFS](#section-16-multi-source-bfs)
+- [17. Bidirectional BFS](#section-17-bidirectional-bfs)
+- [18. State-Space Graphs](#section-18-state-space-graphs)
+- [19. DAG Dynamic Programming](#section-19-dag-dynamic-programming)
+- [20. Eulerian Path / Circuit (Hierholzer's Algorithm)](#section-20-eulerian-path-circuit-hierholzers-algorithm)
+- [21. Trees as Graphs: LCA and Binary Lifting](#section-21-trees-as-graphs-lca-and-binary-lifting)
+- [22. Bipartite Matching](#section-22-bipartite-matching)
+- [Graph Mastery Checklist](#section-graph-mastery-checklist)
+- [Quick Reference Table](#section-quick-reference-table)
+- [Decision Flowchart](#section-decision-flowchart)
+- [10. Heaps & Priority Queues](#section-10-heaps-and-priority-queues)
+- [11. Backtracking](#section-11-backtracking)
+- [Quick Reference Cheat Sheet](#section-quick-reference-cheat-sheet)
+- [Interview Prep Plan](#section-interview-prep-plan)
+- [Who Asks These Questions?](#section-who-asks-these-questions)
+- [Final Tips](#section-final-tips)
+
+
 ---
+
+<a id="section-1-arrays-and-hashing"></a>
 
 ## 1. Arrays & Hashing
 
@@ -39,6 +88,8 @@ for each element:
 - Not considering negative numbers with prefix sums
 
 ---
+
+<a id="section-2-two-pointers"></a>
 
 ## 2. Two Pointers
 
@@ -85,6 +136,8 @@ while fast < len:
 - Wrong comparison (< vs <=)
 
 ---
+
+<a id="section-3-sliding-window"></a>
 
 ## 3. Sliding Window
 
@@ -139,6 +192,8 @@ for right in range(len):
 
 ---
 
+<a id="section-4-binary-search"></a>
+
 ## 4. Binary Search
 
 **Core Intuition:** Eliminate half the search space each step. Works on sorted/monotonic data.
@@ -192,6 +247,8 @@ while left < right:
 
 ---
 
+<a id="section-5-stacks"></a>
+
 ## 5. Stacks
 
 **Core Intuition:** LIFO. Track "pending" items. Great for matching pairs and "next greater" problems.
@@ -241,6 +298,8 @@ for i in range(len):
 
 ---
 
+<a id="section-6-queues"></a>
+
 ## 6. Queues
 
 **Core Intuition:** FIFO. Process in order received. Level-by-level processing.
@@ -287,6 +346,8 @@ for i in range(len):
 ```
 
 ---
+
+<a id="section-7-linked-lists"></a>
 
 ## 7. Linked Lists
 
@@ -344,6 +405,8 @@ return False
 
 ---
 
+<a id="section-8-trees-bfs-and-dfs"></a>
+
 ## 8. Trees (BFS & DFS)
 
 **Core Intuition:**
@@ -396,6 +459,8 @@ while queue:
 - Not tracking level boundaries in BFS
 
 ---
+
+<a id="section-9-graphs-bfs-and-dfs"></a>
 
 ## 9. Graphs (BFS & DFS)
 
@@ -585,9 +650,13 @@ if len(order) != num_nodes: cycle exists
 
 **Graph common patterns**
 
+<a id="section-graph-algorithm-patterns-complete-reference"></a>
+
 # Graph Algorithm Patterns — Complete Reference
 
 ---
+
+<a id="section-1-bfs-breadth-first-search"></a>
 
 ## 1. BFS (Breadth-First Search)
 
@@ -613,6 +682,8 @@ BFS(graph, start):
 - **0-1 BFS:** Use a deque; push weight-0 edges to front, weight-1 edges to back. Replaces Dijkstra when weights are only 0 or 1.
 
 ---
+
+<a id="section-2-dfs-depth-first-search"></a>
 
 ## 2. DFS (Depth-First Search)
 
@@ -645,6 +716,8 @@ DFS_Iterative(graph, start):
 
 ---
 
+<a id="section-3-dijkstras-algorithm"></a>
+
 ## 3. Dijkstra's Algorithm
 
 **When to use:** Shortest path from a single source in a graph with **non-negative** weights. The go-to algorithm whenever edges have varying positive costs (e.g. road networks, weighted grids, minimum cost problems). Will not work correctly if any edge weight is negative.
@@ -670,6 +743,8 @@ Dijkstra(graph, start):
 
 ---
 
+<a id="section-4-bellman-ford-algorithm"></a>
+
 ## 4. Bellman-Ford Algorithm
 
 **When to use:** Shortest path from a single source when **negative edge weights** exist. Also the standard way to detect **negative weight cycles**. Slower than Dijkstra, so only use it when negatives are possible. Common in problems involving currency exchange, arbitrage detection, or constraint-based shortest paths.
@@ -693,6 +768,8 @@ BellmanFord(graph, start, V):
 
 ---
 
+<a id="section-5-floyd-warshall-algorithm"></a>
+
 ## 5. Floyd-Warshall Algorithm
 
 **When to use:** Finding shortest paths between **all pairs** of vertices. Best when V is small (≤ 400–500) because of O(V³) complexity. Use it when you need to answer many "what's the distance from A to B?" queries, or for transitive closure problems. Also handles negative weights (but not negative cycles).
@@ -715,6 +792,8 @@ FloydWarshall(V, edges):
 **Key insight:** The outermost loop must be `k` (the intermediate node). Getting the loop order wrong is the most common mistake.
 
 ---
+
+<a id="section-6-topological-sort"></a>
 
 ## 6. Topological Sort
 
@@ -742,6 +821,8 @@ TopSort(graph, V):
 **DFS-based alternative:** Run DFS and append to result in post-order, then reverse. Useful when you're already doing DFS for something else.
 
 ---
+
+<a id="section-7-cycle-detection"></a>
 
 ## 7. Cycle Detection
 
@@ -780,6 +861,8 @@ HasCycleUndirected(edges, V):
 
 ---
 
+<a id="section-8-union-find-disjoint-set-union"></a>
+
 ## 8. Union-Find (Disjoint Set Union)
 
 **When to use:** Dynamically tracking connected components, detecting cycles in undirected graphs, Kruskal's MST, or any problem that asks "are X and Y connected?" with incremental edge additions. Extremely efficient with path compression + union by rank — nearly O(1) amortised per operation.
@@ -806,6 +889,8 @@ Union(x, y):
 
 ---
 
+<a id="section-9-kruskals-algorithm-minimum-spanning-tree"></a>
+
 ## 9. Kruskal's Algorithm (Minimum Spanning Tree)
 
 **When to use:** Finding the MST when you have an **edge list**. Particularly good when the graph is sparse or when edges are naturally given as a list (e.g. "connect N cities with minimum total cable"). Relies on Union-Find internally.
@@ -827,6 +912,8 @@ Kruskal(edges, V):
 ```
 
 ---
+
+<a id="section-10-prims-algorithm-minimum-spanning-tree"></a>
 
 ## 10. Prim's Algorithm (Minimum Spanning Tree)
 
@@ -852,6 +939,8 @@ Prim(graph, start):
 ```
 
 ---
+
+<a id="section-11-tarjans-algorithm-strongly-connected-components"></a>
 
 ## 11. Tarjan's Algorithm (Strongly Connected Components)
 
@@ -891,6 +980,8 @@ Tarjan(graph):
 ```
 
 ---
+
+<a id="section-12-articulation-points-and-bridges"></a>
 
 ## 12. Articulation Points & Bridges
 
@@ -937,6 +1028,8 @@ FindBridgesAndArticulationPoints(graph):
 
 ---
 
+<a id="section-13-bipartite-check-2-colouring-graph-colouring"></a>
+
 ## 13. Bipartite Check (2-Colouring / Graph Colouring)
 
 **When to use:** Checking if a graph can be split into two groups where no two nodes in the same group share an edge. Equivalent to checking if the graph has no odd-length cycles. Used in matching problems, scheduling (two shifts), and determining if a graph is 2-colourable.
@@ -962,6 +1055,8 @@ IsBipartite(graph):
 ```
 
 ---
+
+<a id="section-14-max-flow-edmonds-karp-bfs-based-ford-fulkerson"></a>
 
 ## 14. Max Flow (Edmonds-Karp / BFS-based Ford-Fulkerson)
 
@@ -1002,6 +1097,8 @@ MaxFlow(graph, source, sink):
 
 ---
 
+<a id="section-15-a-star-search"></a>
+
 ## 15. A\* Search
 
 **When to use:** Shortest path when you have a **heuristic** function that estimates the remaining distance to the goal. Faster than Dijkstra because it prioritises nodes that look closer to the target. Common in grid pathfinding, game AI, and navigation. Requires an **admissible** heuristic (never overestimates) for optimality.
@@ -1034,6 +1131,229 @@ AStar(graph, start, goal, h):
 
 ---
 
+<a id="section-16-multi-source-bfs"></a>
+
+## 16. Multi-Source BFS
+
+**When to use:** A process starts everywhere at once: nearest hospital/gate/zero, fire or infection spreading, distance from any source, or expanding regions.
+
+**Core insight:** Put **all** starting nodes in the queue with distance 0 before BFS begins. This is equivalent to adding a virtual super-source connected to every real source by a zero-cost edge. Running BFS separately from every source is usually the slow, wrong instinct.
+
+```text
+queue = every source
+mark every source visited
+
+while queue not empty:
+    node = pop front
+    for neighbour of node:
+        if neighbour is unvisited:
+            distance[neighbour] = distance[node] + 1
+            mark neighbour visited
+            push neighbour
+```
+
+**Complexity:** O(V + E), because every vertex and edge is still processed at most once.
+
+---
+
+<a id="section-17-bidirectional-bfs"></a>
+
+## 17. Bidirectional BFS
+
+**When to use:** You know both the start and target, edges are unweighted/reversible, and the branching factor is large (Word Ladder is the classic example).
+
+**Core insight:** Search from both ends and stop when the frontiers meet. Always expand the **smaller frontier**. If branching factor is `b` and answer depth is `d`, this can behave like O(b^(d/2)) rather than O(b^d), though worst-case complexity remains O(V + E).
+
+```text
+front = {start}; back = {target}
+visitedFront = {start}; visitedBack = {target}
+
+while front and back:
+    if size(front) > size(back): swap both directions
+    nextFront = empty set
+    for node in front:
+        for neighbour of node:
+            if neighbour in visitedBack: return distance + 1
+            if neighbour not in visitedFront:
+                add neighbour to visitedFront and nextFront
+    front = nextFront
+```
+
+**Do not use blindly:** directed edges may not be reversible; you need reverse adjacency for the search from the target.
+
+---
+
+<a id="section-18-state-space-graphs"></a>
+
+## 18. State-Space Graphs
+
+**When to use:** The legal moves or best answer depend on more than location: keys held, stops used, remaining obstacle eliminations, parity, fuel, last colour, coupons, or a collected-items bitmask.
+
+**Core insight:** A vertex is not merely `node`; it is the complete state, such as `(row, col, keysMask)` or `(city, stopsUsed)`. Two arrivals at the same node can be meaningfully different.
+
+```text
+state = (position, resource_or_mask)
+queue/heap = [startState]
+best[startState] = 0
+
+while worklist not empty:
+    state = remove next state
+    for nextState produced by a legal transition:
+        relax or visit nextState
+```
+
+**Dominance optimisation:** If two states reach the same node, discard one only when it is no better in **every** relevant dimension. Example: lower cost with at least as much fuel dominates higher cost with less fuel.
+
+**Complexity:** Measure the expanded graph. A grid with `R*C` positions and `k` keys can have O(R*C*2^k) states.
+
+---
+
+<a id="section-19-dag-dynamic-programming"></a>
+
+## 19. DAG Dynamic Programming
+
+**When to use:** Longest/shortest paths, counts of paths, earliest completion times, or accumulated values in a directed acyclic graph.
+
+**Core insight:** Topological order turns graph dependencies into a legal DP evaluation order. Unlike general graphs, a DAG supports negative edge weights for shortest paths because there are no cycles.
+
+```text
+order = topologicalSort(graph)
+dp[start] = baseValue
+
+for u in order:
+    for (v, weight) in graph[u]:
+        dp[v] = combine(dp[v], dp[u], weight)
+```
+
+Choose the transition by question:
+
+- shortest path: `dist[v] = min(dist[v], dist[u] + w)`
+- longest path / critical path: use `max`
+- number of paths: `ways[v] += ways[u]`
+- earliest completion: predecessor maximum + current duration
+
+**Complexity:** O(V + E), including the topological sort.
+
+---
+
+<a id="section-20-eulerian-path-circuit-hierholzers-algorithm"></a>
+
+## 20. Eulerian Path / Circuit (Hierholzer's Algorithm)
+
+**When to use:** Use **every edge exactly once**: reconstruct an itinerary, arrange directed pairs, trace every route/connection, or build an Eulerian circuit.
+
+**Do not confuse with Hamiltonian problems:** Eulerian means every **edge** once and has an O(E) algorithm; Hamiltonian means every **vertex** once and is generally much harder.
+
+```text
+stack = [start]
+route = []
+
+while stack not empty:
+    u = stack.top
+    if u has unused outgoing edges:
+        consume one edge u -> v
+        stack.push(v)
+    else:
+        route.append(stack.pop())
+
+reverse(route)
+```
+
+**Degree conditions:**
+
+- Undirected circuit: every non-isolated vertex has even degree.
+- Undirected path: exactly 0 or 2 odd-degree vertices.
+- Directed circuit: indegree equals outdegree for every used vertex.
+- Directed path: one vertex may have `out = in + 1`, and one may have `in = out + 1`.
+- Used edges must also belong to the appropriate connected component.
+
+For lexical order (Reconstruct Itinerary), consume the smallest destination first with sorted adjacency/min-heaps.
+
+---
+
+<a id="section-21-trees-as-graphs-lca-and-binary-lifting"></a>
+
+## 21. Trees as Graphs: LCA and Binary Lifting
+
+**When to use:** Many ancestor, LCA, distance, or kth-ancestor queries on a static tree.
+
+**Core insight:** One DFS records depth and immediate parent. Binary lifting precomputes `up[v][j]`, the `2^j`-th ancestor of `v`. Lift the deeper node, then lift both nodes from the largest power down until their parents match.
+
+```text
+up[v][0] = parent[v]
+up[v][j] = up[ up[v][j - 1] ][j - 1]
+
+LCA(a, b):
+    lift deeper node until depths match
+    if a == b: return a
+    for j from LOG - 1 down to 0:
+        if up[a][j] != up[b][j]:
+            a = up[a][j]
+            b = up[b][j]
+    return up[a][0]
+```
+
+**Complexity:** O(V log V) preprocessing, O(log V) per query. Tree distance is `depth[a] + depth[b] - 2 * depth[lca]` for unit edges.
+
+---
+
+<a id="section-22-bipartite-matching"></a>
+
+## 22. Bipartite Matching
+
+**When to use:** Maximum one-to-one assignments between two groups: people to jobs, students to projects, applicants to positions, or rows to columns.
+
+**Core insight:** Each successful augmenting path increases the matching by one. A simple DFS-based matcher is often enough for interview constraints; Hopcroft-Karp improves large unweighted bipartite graphs to O(E sqrt(V)). General maximum flow also models capacities greater than one.
+
+```text
+for each left vertex u:
+    clear seenRight
+    if findAugmentingPath(u): matches += 1
+
+findAugmentingPath(u):
+    for v in neighbours[u]:
+        if v already seen: continue
+        mark v seen
+        if v is unmatched or findAugmentingPath(matchRight[v]):
+            matchRight[v] = u
+            return true
+    return false
+```
+
+---
+
+<a id="section-graph-mastery-checklist"></a>
+
+## Graph Mastery Checklist
+
+Before coding, say these out loud:
+
+1. **What is one vertex?** A cell, word, account, or a richer `(node, state)` tuple?
+2. **What is one edge?** Directed or undirected? Explicit or generated on demand?
+3. **What do weights mean?** All 1, only 0/1, non-negative, possibly negative, or a DAG?
+4. **What is requested?** Reachability, one shortest path, all distances, ordering, components, MST, or every edge?
+5. **Can I prove the invariant?** First BFS visit, minimum heap extraction, safe MST edge, or topological predecessor order?
+6. **When is a node final?** On enqueue for ordinary BFS; on minimum-distance removal for Dijkstra; sometimes never globally when state/resources differ.
+7. **Can recursion overflow?** Prefer iterative DFS on large/deep inputs.
+8. **What are the real bounds?** Complexity is in V and E—or in the expanded number of states—not just the input's row count.
+
+### High-value failure modes
+
+- Using BFS merely because the input is a graph, even though edges have unequal costs.
+- Using Dijkstra with negative edges.
+- Marking Dijkstra nodes visited when inserted into the heap instead of handling improved distances.
+- Marking only a location visited when keys/stops/resources are part of state.
+- Treating a directed edge as undirected while building adjacency.
+- Forgetting disconnected components (loop over every vertex for DFS, bipartite checks, and SCC/bridge work).
+- Mistaking an MST for a shortest-path tree: MST minimises total tree cost; it does not minimise distance from a source.
+- Forgetting parallel edges or the parent **edge ID** in bridge detection.
+- Returning a topological order without checking that it contains all V nodes.
+- Applying Floyd-Warshall without guarding infinity before addition.
+
+---
+
+<a id="section-quick-reference-table"></a>
+
 ## Quick Reference Table
 
 | Problem                               | Algorithm                     | Key Condition                  |
@@ -1053,8 +1373,18 @@ AStar(graph, start, goal, h):
 | 2-colourability / odd cycle check     | Bipartite BFS                 | Undirected graph               |
 | Maximum flow / minimum cut            | Edmonds-Karp                  | Flow network with capacities   |
 | Heuristic-guided pathfinding          | A\*                           | Admissible heuristic available |
+| Simultaneous nearest-source distance  | Multi-source BFS              | Many sources start at time 0   |
+| Unweighted start-to-target, huge fanout | Bidirectional BFS           | Reverse moves are available    |
+| Edge weights only 0 or 1              | 0-1 BFS                       | Push free edges to deque front |
+| Location plus keys/stops/resources    | State-space BFS/Dijkstra      | Full state determines future   |
+| Longest/count/shortest path in a DAG  | Topological sort + DP         | Directed acyclic graph         |
+| Use every edge exactly once           | Hierholzer                    | Eulerian degree/connectivity   |
+| Many ancestor/LCA queries on a tree   | Binary lifting                | Static tree                    |
+| Maximum one-to-one assignments        | Bipartite matching            | Two disjoint vertex groups     |
 
 ---
+
+<a id="section-decision-flowchart"></a>
 
 ## Decision Flowchart
 
@@ -1085,6 +1415,8 @@ Is it a shortest path problem?
 ```
 
 ---
+
+<a id="section-10-heaps-and-priority-queues"></a>
 
 ## 10. Heaps & Priority Queues
 
@@ -1147,6 +1479,8 @@ return dummy.next
 
 ---
 
+<a id="section-11-backtracking"></a>
+
 ## 11. Backtracking
 
 **Core Intuition:** Try all possibilities, undo and try next. Systematic brute force with pruning.
@@ -1208,6 +1542,8 @@ def backtrack(current):
 
 ---
 
+<a id="section-quick-reference-cheat-sheet"></a>
+
 ## Quick Reference Cheat Sheet
 
 | Problem Pattern          | Data Structure | Time Complexity |
@@ -1223,6 +1559,8 @@ def backtrack(current):
 | Generate all X           | Backtracking   | O(2^n) or O(n!) |
 
 ---
+
+<a id="section-interview-prep-plan"></a>
 
 # Interview Prep Plan
 
@@ -1360,6 +1698,8 @@ Month 2+:  10% Easy, 60% Medium, 30% Hard
 
 ---
 
+<a id="section-who-asks-these-questions"></a>
+
 # Who Asks These Questions?
 
 ## Companies by DSA Difficulty
@@ -1424,6 +1764,8 @@ Month 2+:  10% Easy, 60% Medium, 30% Hard
 **Bottom Line:** DSA prep is highest ROI for FAANG/Big Tech. For other companies, balance with practical projects and system design.
 
 ---
+
+<a id="section-final-tips"></a>
 
 ## Final Tips
 

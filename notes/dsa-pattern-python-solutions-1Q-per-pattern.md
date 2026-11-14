@@ -1,6 +1,269 @@
 # DSA Patterns: Problem Statements, Python Solutions & Intuition
 
+<a id="quick-navigation"></a>
+
+## Quick navigation
+
+- [0. Python Language & Data Structure Cheat Sheet](#section-0-python-language-and-data-structure-cheat-sheet)
+- [1. Arrays & Hashing](#section-1-arrays-and-hashing)
+- [2. Two Pointers](#section-2-two-pointers)
+- [3. Sliding Window](#section-3-sliding-window)
+- [4. Binary Search](#section-4-binary-search)
+- [5. Stack](#section-5-stack)
+- [6. Queue / BFS](#section-6-queue-bfs)
+- [7. Linked List](#section-7-linked-list)
+- [8. Trees - DFS](#section-8-trees-dfs)
+- [9. Trees - BFS](#section-9-trees-bfs)
+- [10. Graphs - DFS](#section-10-graphs-dfs)
+- [11. Graphs - BFS (Shortest Path)](#section-11-graphs-bfs-shortest-path)
+- [12. Heap / Priority Queue](#section-12-heap-priority-queue)
+- [13. Backtracking](#section-13-backtracking)
+- [14. Graph - Topological Sort](#section-14-graph-topological-sort)
+- [Graph Mastery Expansion: One Question Per Advanced Pattern](#section-graph-mastery-expansion-one-question-per-advanced-pattern)
+- [Bonus Patterns](#section-bonus-patterns)
+- [Python Tips for Interviews](#section-python-tips-for-interviews)
+
+
 ---
+
+<a id="section-0-python-language-and-data-structure-cheat-sheet"></a>
+
+## 0. Python Language & Data Structure Cheat Sheet
+
+### Imports and basic syntax
+
+```python
+from collections import Counter, defaultdict, deque
+import heapq
+from math import inf
+
+def solve(nums):
+    answer = 0
+    return answer
+
+# Multiple assignment / swap
+left, right = right, left
+quotient, remainder = divmod(17, 5)
+```
+
+### Loops
+
+```python
+for value in nums:                         # values
+    pass
+
+for index in range(len(nums)):             # indices: 0 ... n - 1
+    value = nums[index]
+
+for index, value in enumerate(nums):       # index + value
+    pass
+
+for index in range(len(nums) - 1, -1, -1): # backwards by index
+    pass
+
+for value in reversed(nums):               # backwards by value
+    pass
+
+for left_value, right_value in zip(a, b):  # parallel iteration
+    pass
+
+for key, value in mapping.items():         # dictionary entries
+    pass
+
+while left <= right:
+    left += 1
+
+# break exits one loop; continue skips to its next iteration.
+```
+
+### Lists / dynamic arrays
+
+```python
+nums = [3, 1, 2]
+zeros = [0] * n
+matrix = [[0] * cols for _ in range(rows)] # independent rows
+
+nums.append(4)             # add at end: O(1) amortised
+nums.extend([5, 6])        # add many at end
+nums.insert(1, 99)         # add at index: O(n)
+
+last = nums.pop()          # remove + return last: O(1)
+value = nums.pop(1)        # remove + return index: O(n)
+nums.remove(99)            # remove first matching value: O(n), raises if absent
+del nums[1]                # delete index
+nums.clear()
+
+exists = 3 in nums         # O(n)
+index = nums.index(3)      # raises ValueError if absent
+count = nums.count(3)
+
+nums.sort()                # mutate ascending
+nums.sort(reverse=True)
+ordered = sorted(nums)     # new list
+pairs.sort(key=lambda pair: (pair[1], pair[0]))
+
+copy = nums.copy()         # shallow copy
+piece = nums[start:end]    # end excluded
+reversed_copy = nums[::-1]
+squares = [value * value for value in nums if value > 0]
+```
+
+**Trap:** never create a matrix with `[[0] * cols] * rows`; every row would reference the same list.
+
+### Tuples and strings
+
+```python
+point = (row, col)              # immutable; hashable if contents are hashable
+row, col = point
+first, *middle, last = nums
+
+text = "graph"
+character = text[index]
+substring = text[start:end]     # end excluded
+contains = "rap" in text
+position = text.find("x")       # -1 if absent
+parts = text.split(",")
+joined = "-".join(parts)
+trimmed = text.strip()
+replaced = text.replace("a", "b")
+number = int("42")
+digits = str(42)
+
+characters = list(text)         # strings are immutable
+characters[index] = "X"
+text = "".join(characters)
+```
+
+### Dictionaries / hash maps
+
+```python
+mapping = {}
+mapping[key] = value                           # add or replace
+value = mapping[key]                           # KeyError if missing
+value = mapping.get(key, default)
+mapping.setdefault(key, []).append(value)
+frequency[value] = frequency.get(value, 0) + 1
+
+exists = key in mapping                        # checks keys
+removed = mapping.pop(key, default)
+del mapping[key]                               # KeyError if missing
+
+for key in mapping:
+    value = mapping[key]
+for key, value in mapping.items():
+    pass
+
+groups = defaultdict(list)
+groups[key].append(value)
+frequency = Counter(nums)
+most_common = frequency.most_common(k)
+```
+
+Average lookup/add/remove is O(1). Keys must be hashable: numbers, strings, or immutable tuples work; lists do not.
+
+### Sets
+
+```python
+seen = set()
+seen.add(value)
+seen.update(values)
+exists = value in seen
+seen.remove(value)       # raises KeyError if absent
+seen.discard(value)      # safe if absent
+value = seen.pop()       # removes an arbitrary item
+seen.clear()
+
+union = first | second
+intersection = first & second
+difference = first - second
+is_subset = first <= second
+```
+
+Average membership/add/remove is O(1). Use a set for fast existence checks and uniqueness.
+
+### Stack, queue, and deque
+
+```python
+# Stack: use a list
+stack = []
+stack.append(value)      # push
+top = stack[-1]          # peek
+value = stack.pop()      # pop
+is_empty = not stack
+
+# Queue / deque
+queue = deque()
+queue.append(value)      # add right
+value = queue.popleft()  # remove left
+front = queue[0]
+queue.appendleft(value)
+value = queue.pop()      # remove right
+is_empty = not queue
+```
+
+Never use `list.pop(0)` for a queue—it is O(n). A `deque` gives O(1) operations at both ends.
+
+### Heap / priority queue
+
+```python
+min_heap = []
+heapq.heappush(min_heap, value)
+smallest = min_heap[0]
+smallest = heapq.heappop(min_heap)
+smallest = heapq.heappushpop(min_heap, value)
+heapq.heapify(nums)                         # in place, O(n)
+
+max_heap = []
+heapq.heappush(max_heap, -value)            # negate numeric priorities
+largest = -heapq.heappop(max_heap)
+
+task_heap = []
+heapq.heappush(task_heap, (priority, node))  # tuples compare left to right
+priority, node = heapq.heappop(task_heap)
+```
+
+Heap push/pop is O(log n); peek is O(1). Python's heap is a min-heap.
+
+### Graphs, grids, and common interview helpers
+
+```python
+# Unweighted graph
+graph = [[] for _ in range(n)]
+for first, second in edges:
+    graph[first].append(second)
+    graph[second].append(first)  # omit for directed graphs
+
+# Weighted graph: graph[u] contains (neighbour, weight)
+weighted = [[] for _ in range(n)]
+for source, target, weight in edges:
+    weighted[source].append((target, weight))
+
+visited = [False] * n
+directions4 = ((1, 0), (-1, 0), (0, 1), (0, -1))
+
+# Safe infinity and copies
+best = inf
+negative_best = -inf
+shallow = nums.copy()
+grid_copy = [row[:] for row in grid]
+```
+
+### Complexity reminders
+
+| Structure | Add | Remove | Membership / lookup | Peek |
+| --------- | --- | ------ | ------------------- | ---- |
+| `list` end | O(1)* | O(1) | O(n) | O(1) |
+| `list` front/middle | O(n) | O(n) | O(n) | O(1) |
+| `dict` / `set` average | O(1) | O(1) | O(1) | — |
+| `deque` ends | O(1) | O(1) | O(n) | O(1) |
+| heap | O(log n) | O(log n) | O(n) | O(1) |
+
+*Amortised. Prefer clear operations over clever one-liners during interviews.
+
+---
+
+
+<a id="section-1-arrays-and-hashing"></a>
 
 ## 1. Arrays & Hashing
 
@@ -44,6 +307,8 @@ The brute force is O(n²): check every pair. But notice: if we need `a + b = tar
 **Mental Model:** "I've seen these numbers before, is my partner already waiting for me?"
 
 ---
+
+<a id="section-2-two-pointers"></a>
 
 ## 2. Two Pointers
 
@@ -94,6 +359,8 @@ Start with the widest container (pointers at both ends). The only way to potenti
 **Mental Model:** "I have maximum width. I can only improve by trading width for height. Always sacrifice the weaker side."
 
 ---
+
+<a id="section-3-sliding-window"></a>
 
 ## 3. Sliding Window
 
@@ -163,6 +430,8 @@ We want contiguous characters (substring), so sliding window fits. Expand the ri
 
 ---
 
+<a id="section-4-binary-search"></a>
+
 ## 4. Binary Search
 
 ### Problem: Search in Rotated Sorted Array
@@ -218,6 +487,8 @@ In a rotated sorted array, at least one half (left or right of mid) is always pr
 
 ---
 
+<a id="section-5-stack"></a>
+
 ## 5. Stack
 
 ### Problem: Daily Temperatures
@@ -262,6 +533,8 @@ Each day is "waiting" for a warmer day. Push days onto the stack. When a warmer 
 **Mental Model:** "Each day goes into a waiting room (stack). When a hotter day arrives, it 'answers' everyone in the waiting room who was cooler."
 
 ---
+
+<a id="section-6-queue-bfs"></a>
 
 ## 6. Queue / BFS
 
@@ -337,6 +610,8 @@ This is a multi-source BFS. All rotten oranges start spreading simultaneously—
 
 ---
 
+<a id="section-7-linked-list"></a>
+
 ## 7. Linked List
 
 ### Problem: Reverse Linked List
@@ -404,6 +679,8 @@ def reverse_list_recursive(head: ListNode) -> ListNode:
 
 ---
 
+<a id="section-8-trees-dfs"></a>
+
 ## 8. Trees - DFS
 
 ### Problem: Lowest Common Ancestor of Binary Tree
@@ -455,6 +732,8 @@ DFS down the tree. If we find p or q, return it upward. If a node receives non-n
 **Mental Model:** "Send scouts down both paths. If both scouts report back to a node, that node is the meeting point."
 
 ---
+
+<a id="section-9-trees-bfs"></a>
 
 ## 9. Trees - BFS
 
@@ -510,6 +789,8 @@ BFS naturally visits nodes level by level. The key trick: before processing a le
 **Mental Model:** "Process the queue in batches. Each batch = one level."
 
 ---
+
+<a id="section-10-graphs-dfs"></a>
 
 ## 10. Graphs - DFS
 
@@ -574,6 +855,8 @@ Each '1' we find could be a new island. Start DFS from it to mark all connected 
 **Mental Model:** "When I find land, I've discovered an island. Flood-fill to mark the whole island as explored, then keep looking for undiscovered islands."
 
 ---
+
+<a id="section-11-graphs-bfs-shortest-path"></a>
 
 ## 11. Graphs - BFS (Shortest Path)
 
@@ -644,6 +927,8 @@ BFS explores all cells at distance K before any cell at distance K+1. So the fir
 
 ---
 
+<a id="section-12-heap-priority-queue"></a>
+
 ## 12. Heap / Priority Queue
 
 ### Problem: Merge K Sorted Lists
@@ -700,6 +985,8 @@ At any moment, the next smallest element must be the head of one of the K lists.
 **Mental Model:** "K contestants, each with a line of numbers. Keep asking 'who has the smallest front number?' A heap answers this efficiently."
 
 ---
+
+<a id="section-13-backtracking"></a>
 
 ## 13. Backtracking
 
@@ -758,6 +1045,8 @@ Backtracking = controlled brute force. At each step, try adding each candidate. 
 **Mental Model:** "Build combinations one choice at a time. If it works, save it. If not, undo the last choice and try another. Never go backwards in the candidate list to avoid duplicates."
 
 ---
+
+<a id="section-14-graph-topological-sort"></a>
 
 ## 14. Graph - Topological Sort
 
@@ -859,6 +1148,299 @@ Model as a directed graph: edge from A to B means "A must come before B". Topolo
 
 ---
 
+<a id="section-graph-mastery-expansion-one-question-per-advanced-pattern"></a>
+
+## Graph Mastery Expansion: One Question Per Advanced Pattern
+
+### G1. Dijkstra - Network Delay Time
+
+**Use when:** shortest paths have non-negative, unequal weights.
+
+```python
+from collections import defaultdict
+import heapq
+
+def networkDelayTime(times, n, start):
+    graph = defaultdict(list)
+    for source, target, weight in times:
+        graph[source].append((target, weight))
+
+    distance = [float("inf")] * (n + 1)
+    distance[start] = 0
+    min_heap = [(0, start)]
+
+    while min_heap:
+        current_distance, node = heapq.heappop(min_heap)
+        if current_distance != distance[node]:  # stale entry
+            continue
+
+        for neighbour, weight in graph[node]:
+            candidate = current_distance + weight
+            if candidate < distance[neighbour]:
+                distance[neighbour] = candidate
+                heapq.heappush(min_heap, (candidate, neighbour))
+
+    answer = max(distance[1:])
+    return -1 if answer == float("inf") else answer
+```
+
+**Invariant:** removing the current minimum distance finalises it because future edges cannot reduce it with a negative amount.
+
+**Complexity:** O((V + E) log V) time, O(V + E) space.
+
+---
+
+### G2. 0-1 BFS - Minimum Obstacle Removal
+
+**Use when:** every edge weight is exactly 0 or 1.
+
+```python
+from collections import deque
+
+def minimumObstacles(grid):
+    rows, cols = len(grid), len(grid[0])
+    distance = [[float("inf")] * cols for _ in range(rows)]
+    distance[0][0] = 0
+    worklist = deque([(0, 0)])
+
+    while worklist:
+        row, col = worklist.popleft()
+        for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            next_row, next_col = row + dr, col + dc
+            if not (0 <= next_row < rows and 0 <= next_col < cols):
+                continue
+            weight = grid[next_row][next_col]
+            candidate = distance[row][col] + weight
+            if candidate >= distance[next_row][next_col]:
+                continue
+            distance[next_row][next_col] = candidate
+            if weight == 0:
+                worklist.appendleft((next_row, next_col))
+            else:
+                worklist.append((next_row, next_col))
+
+    return distance[-1][-1]
+```
+
+**Intuition:** free moves belong at the front and cost-one moves at the back. This preserves shortest-distance order without a heap.
+
+**Complexity:** O(V + E) time, O(V) space.
+
+---
+
+### G3. Union-Find - Redundant Connection
+
+**Use when:** edges arrive over time and you repeatedly merge or query components.
+
+```python
+class UnionFind:
+    def __init__(self, size):
+        self.parent = list(range(size))
+        self.size = [1] * size
+
+    def find(self, node):
+        if self.parent[node] != node:
+            self.parent[node] = self.find(self.parent[node])
+        return self.parent[node]
+
+    def union(self, first, second):
+        root_first, root_second = self.find(first), self.find(second)
+        if root_first == root_second:
+            return False
+        if self.size[root_first] < self.size[root_second]:
+            root_first, root_second = root_second, root_first
+        self.parent[root_second] = root_first
+        self.size[root_first] += self.size[root_second]
+        return True
+
+def findRedundantConnection(edges):
+    union_find = UnionFind(len(edges) + 1)
+    for first, second in edges:
+        if not union_find.union(first, second):
+            return [first, second]
+    return []
+```
+
+**Intuition:** an undirected edge closes a cycle exactly when both endpoints already have the same representative.
+
+**Complexity:** O(E alpha(V)) time, O(V) space; `alpha` is effectively constant.
+
+---
+
+### G4. Minimum Spanning Tree - Min Cost to Connect All Points
+
+**Use when:** every node must be connected while minimising the **total** chosen edge cost.
+
+```python
+import heapq
+
+def minCostConnectPoints(points):
+    n = len(points)
+    in_tree = [False] * n
+    min_heap = [(0, 0)]  # edge cost, destination
+    total_cost = used = 0
+
+    while used < n:
+        cost, point = heapq.heappop(min_heap)
+        if in_tree[point]:
+            continue
+        in_tree[point] = True
+        total_cost += cost
+        used += 1
+
+        x1, y1 = points[point]
+        for neighbour, (x2, y2) in enumerate(points):
+            if not in_tree[neighbour]:
+                heapq.heappush(
+                    min_heap,
+                    (abs(x1 - x2) + abs(y1 - y2), neighbour),
+                )
+    return total_cost
+```
+
+**Key distinction:** MST minimises the whole network's total cost; Dijkstra minimises paths from a source.
+
+---
+
+### G5. Tarjan Low-Link - Critical Connections
+
+**Use when:** removing one undirected edge may disconnect the network.
+
+```python
+def criticalConnections(n, connections):
+    graph = [[] for _ in range(n)]
+    for edge_id, (first, second) in enumerate(connections):
+        graph[first].append((second, edge_id))
+        graph[second].append((first, edge_id))
+
+    discovery = [-1] * n
+    low = [0] * n
+    timer = 0
+    bridges = []
+
+    def dfs(node, parent_edge):
+        nonlocal timer
+        discovery[node] = low[node] = timer
+        timer += 1
+
+        for neighbour, edge_id in graph[node]:
+            if edge_id == parent_edge:
+                continue
+            if discovery[neighbour] == -1:
+                dfs(neighbour, edge_id)
+                low[node] = min(low[node], low[neighbour])
+                if low[neighbour] > discovery[node]:
+                    bridges.append([node, neighbour])
+            else:
+                low[node] = min(low[node], discovery[neighbour])
+
+    for node in range(n):
+        if discovery[node] == -1:
+            dfs(node, -1)
+    return bridges
+```
+
+**Invariant:** `low[v]` is the earliest discovery reachable from `v`'s subtree without its parent edge. If `low[v] > discovery[u]`, edge `u-v` is the only way back.
+
+---
+
+### G6. State-Space BFS - Shortest Path to Get All Keys
+
+**Use when:** position alone does not determine available moves.
+
+```python
+from collections import deque
+
+def shortestPathAllKeys(grid):
+    rows, cols = len(grid), len(grid[0])
+    all_keys = 0
+    start = None
+    for row in range(rows):
+        for col in range(cols):
+            cell = grid[row][col]
+            if cell == "@":
+                start = (row, col)
+            elif "a" <= cell <= "f":
+                all_keys |= 1 << (ord(cell) - ord("a"))
+
+    queue = deque([(start[0], start[1], 0, 0)])
+    visited = {(start[0], start[1], 0)}
+
+    while queue:
+        row, col, keys, steps = queue.popleft()
+        if keys == all_keys:
+            return steps
+        for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            next_row, next_col = row + dr, col + dc
+            if not (0 <= next_row < rows and 0 <= next_col < cols):
+                continue
+            cell = grid[next_row][next_col]
+            if cell == "#":
+                continue
+            next_keys = keys
+            if "a" <= cell <= "f":
+                next_keys |= 1 << (ord(cell) - ord("a"))
+            if "A" <= cell <= "F" and not (keys & (1 << (ord(cell) - ord("A")))):
+                continue
+            state = (next_row, next_col, next_keys)
+            if state not in visited:
+                visited.add(state)
+                queue.append((next_row, next_col, next_keys, steps + 1))
+    return -1
+```
+
+**The unlock:** the vertex is `(row, col, keys)`, not `(row, col)`. Complexity is based on the expanded graph: O(rows * cols * 2^keys).
+
+---
+
+### G7. Eulerian Path - Reconstruct Itinerary
+
+**Use when:** every edge/ticket/pair must be used exactly once.
+
+```python
+from collections import defaultdict
+
+def findItinerary(tickets):
+    graph = defaultdict(list)
+    for source, destination in sorted(tickets, reverse=True):
+        graph[source].append(destination)
+
+    route = []
+    def visit(airport):
+        while graph[airport]:
+            visit(graph[airport].pop())
+        route.append(airport)
+
+    visit("JFK")
+    return route[::-1]
+```
+
+Hierholzer's algorithm appends only when stuck, so it builds the route backwards. Eulerian means every **edge** once; Hamiltonian means every **vertex** once.
+
+---
+
+### Advanced Graph Selection Card
+
+| Clue | Reach for |
+| ---- | --------- |
+| First/nearest/fewest steps; all edges equal | BFS |
+| All sources spread simultaneously | Multi-source BFS |
+| Weights only 0/1 | 0-1 BFS |
+| Non-negative unequal weights | Dijkstra |
+| Negative edges or bounded edge count | Bellman-Ford |
+| Dependencies or a DAG path/count | Topological sort + DP |
+| Merge groups / redundant edge | Union-Find |
+| Minimum total connection cost | MST |
+| Critical edge | Low-link DFS |
+| Use every edge once | Hierholzer |
+| Keys, stops, coupons, parity, remaining resource | Expand the state |
+
+Always state: what is a vertex, what is an edge, directed or undirected, weight rules, when a distance becomes final, and complexity in V/E or expanded states.
+
+---
+
+<a id="section-bonus-patterns"></a>
+
 ## Bonus Patterns
 
 ### 15. Two Pointers - Fast & Slow (Linked List Cycle)
@@ -949,6 +1531,8 @@ def min_eating_speed(piles: list[int], h: int) -> int:
 **Intuition:** Binary search on the answer space. Check if a given answer works, then narrow the range.
 
 ---
+
+<a id="section-python-tips-for-interviews"></a>
 
 ## Python Tips for Interviews
 

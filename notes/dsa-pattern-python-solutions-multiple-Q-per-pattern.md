@@ -1,6 +1,268 @@
 # Complete DSA Patterns: Multiple Problems Per Pattern (Python)
 
+<a id="quick-navigation"></a>
+
+## Quick navigation
+
+- [0. Python Language & Data Structure Cheat Sheet](#section-0-python-language-and-data-structure-cheat-sheet)
+- [1. ARRAYS & HASHING](#section-1-arrays-and-hashing)
+- [2. TWO POINTERS](#section-2-two-pointers)
+- [3. SLIDING WINDOW](#section-3-sliding-window)
+- [4. BINARY SEARCH](#section-4-binary-search)
+- [5. STACKS](#section-5-stacks)
+- [6. QUEUES](#section-6-queues)
+- [7. LINKED LISTS](#section-7-linked-lists)
+- [8. TREES - DFS](#section-8-trees-dfs)
+- [9. TREES - BFS](#section-9-trees-bfs)
+- [10. GRAPHS - DFS](#section-10-graphs-dfs)
+- [11. GRAPHS - BFS (SHORTEST PATH)](#section-11-graphs-bfs-shortest-path)
+- [12. TOPOLOGICAL SORT](#section-12-topological-sort)
+- [13. HEAPS / PRIORITY QUEUE](#section-13-heaps-priority-queue)
+- [14. BACKTRACKING](#section-14-backtracking)
+- [15. ADVANCED GRAPH PATTERNS](#section-15-advanced-graph-patterns)
+- [Quick Reference: Pattern Selection](#section-quick-reference-pattern-selection)
+
+
 ---
+
+<a id="section-0-python-language-and-data-structure-cheat-sheet"></a>
+
+## 0. Python Language & Data Structure Cheat Sheet
+
+### Imports and basic syntax
+
+```python
+from collections import Counter, defaultdict, deque
+import heapq
+from math import inf
+
+def solve(nums):
+    answer = 0
+    return answer
+
+# Multiple assignment / swap
+left, right = right, left
+quotient, remainder = divmod(17, 5)
+```
+
+### Loops
+
+```python
+for value in nums:                         # values
+    pass
+
+for index in range(len(nums)):             # indices: 0 ... n - 1
+    value = nums[index]
+
+for index, value in enumerate(nums):       # index + value
+    pass
+
+for index in range(len(nums) - 1, -1, -1): # backwards by index
+    pass
+
+for value in reversed(nums):               # backwards by value
+    pass
+
+for left_value, right_value in zip(a, b):  # parallel iteration
+    pass
+
+for key, value in mapping.items():         # dictionary entries
+    pass
+
+while left <= right:
+    left += 1
+
+# break exits one loop; continue skips to its next iteration.
+```
+
+### Lists / dynamic arrays
+
+```python
+nums = [3, 1, 2]
+zeros = [0] * n
+matrix = [[0] * cols for _ in range(rows)] # independent rows
+
+nums.append(4)             # add at end: O(1) amortised
+nums.extend([5, 6])        # add many at end
+nums.insert(1, 99)         # add at index: O(n)
+
+last = nums.pop()          # remove + return last: O(1)
+value = nums.pop(1)        # remove + return index: O(n)
+nums.remove(99)            # remove first matching value: O(n), raises if absent
+del nums[1]                # delete index
+nums.clear()
+
+exists = 3 in nums         # O(n)
+index = nums.index(3)      # raises ValueError if absent
+count = nums.count(3)
+
+nums.sort()                # mutate ascending
+nums.sort(reverse=True)
+ordered = sorted(nums)     # new list
+pairs.sort(key=lambda pair: (pair[1], pair[0]))
+
+copy = nums.copy()         # shallow copy
+piece = nums[start:end]    # end excluded
+reversed_copy = nums[::-1]
+squares = [value * value for value in nums if value > 0]
+```
+
+**Trap:** never create a matrix with `[[0] * cols] * rows`; every row would reference the same list.
+
+### Tuples and strings
+
+```python
+point = (row, col)              # immutable; hashable if contents are hashable
+row, col = point
+first, *middle, last = nums
+
+text = "graph"
+character = text[index]
+substring = text[start:end]     # end excluded
+contains = "rap" in text
+position = text.find("x")       # -1 if absent
+parts = text.split(",")
+joined = "-".join(parts)
+trimmed = text.strip()
+replaced = text.replace("a", "b")
+number = int("42")
+digits = str(42)
+
+characters = list(text)         # strings are immutable
+characters[index] = "X"
+text = "".join(characters)
+```
+
+### Dictionaries / hash maps
+
+```python
+mapping = {}
+mapping[key] = value                           # add or replace
+value = mapping[key]                           # KeyError if missing
+value = mapping.get(key, default)
+mapping.setdefault(key, []).append(value)
+frequency[value] = frequency.get(value, 0) + 1
+
+exists = key in mapping                        # checks keys
+removed = mapping.pop(key, default)
+del mapping[key]                               # KeyError if missing
+
+for key in mapping:
+    value = mapping[key]
+for key, value in mapping.items():
+    pass
+
+groups = defaultdict(list)
+groups[key].append(value)
+frequency = Counter(nums)
+most_common = frequency.most_common(k)
+```
+
+Average lookup/add/remove is O(1). Keys must be hashable: numbers, strings, or immutable tuples work; lists do not.
+
+### Sets
+
+```python
+seen = set()
+seen.add(value)
+seen.update(values)
+exists = value in seen
+seen.remove(value)       # raises KeyError if absent
+seen.discard(value)      # safe if absent
+value = seen.pop()       # removes an arbitrary item
+seen.clear()
+
+union = first | second
+intersection = first & second
+difference = first - second
+is_subset = first <= second
+```
+
+Average membership/add/remove is O(1). Use a set for fast existence checks and uniqueness.
+
+### Stack, queue, and deque
+
+```python
+# Stack: use a list
+stack = []
+stack.append(value)      # push
+top = stack[-1]          # peek
+value = stack.pop()      # pop
+is_empty = not stack
+
+# Queue / deque
+queue = deque()
+queue.append(value)      # add right
+value = queue.popleft()  # remove left
+front = queue[0]
+queue.appendleft(value)
+value = queue.pop()      # remove right
+is_empty = not queue
+```
+
+Never use `list.pop(0)` for a queue—it is O(n). A `deque` gives O(1) operations at both ends.
+
+### Heap / priority queue
+
+```python
+min_heap = []
+heapq.heappush(min_heap, value)
+smallest = min_heap[0]
+smallest = heapq.heappop(min_heap)
+smallest = heapq.heappushpop(min_heap, value)
+heapq.heapify(nums)                         # in place, O(n)
+
+max_heap = []
+heapq.heappush(max_heap, -value)            # negate numeric priorities
+largest = -heapq.heappop(max_heap)
+
+task_heap = []
+heapq.heappush(task_heap, (priority, node))  # tuples compare left to right
+priority, node = heapq.heappop(task_heap)
+```
+
+Heap push/pop is O(log n); peek is O(1). Python's heap is a min-heap.
+
+### Graphs, grids, and common interview helpers
+
+```python
+# Unweighted graph
+graph = [[] for _ in range(n)]
+for first, second in edges:
+    graph[first].append(second)
+    graph[second].append(first)  # omit for directed graphs
+
+# Weighted graph: graph[u] contains (neighbour, weight)
+weighted = [[] for _ in range(n)]
+for source, target, weight in edges:
+    weighted[source].append((target, weight))
+
+visited = [False] * n
+directions4 = ((1, 0), (-1, 0), (0, 1), (0, -1))
+
+# Safe infinity and copies
+best = inf
+negative_best = -inf
+shallow = nums.copy()
+grid_copy = [row[:] for row in grid]
+```
+
+### Complexity reminders
+
+| Structure | Add | Remove | Membership / lookup | Peek |
+| --------- | --- | ------ | ------------------- | ---- |
+| `list` end | O(1)* | O(1) | O(n) | O(1) |
+| `list` front/middle | O(n) | O(n) | O(n) | O(1) |
+| `dict` / `set` average | O(1) | O(1) | O(1) | — |
+| `deque` ends | O(1) | O(1) | O(n) | O(1) |
+| heap | O(log n) | O(log n) | O(n) | O(1) |
+
+*Amortised. Prefer clear operations over clever one-liners during interviews.
+
+---
+
+
+<a id="section-1-arrays-and-hashing"></a>
 
 # 1. ARRAYS & HASHING
 
@@ -154,6 +416,8 @@ def subarray_sum(nums: list[int], k: int) -> int:
 
 ---
 
+<a id="section-2-two-pointers"></a>
+
 # 2. TWO POINTERS
 
 ---
@@ -299,6 +563,8 @@ def move_zeroes(nums: list[int]) -> None:
 **Intuition:** Swap non-zero elements to the front. Zeroes naturally end up at the back.
 
 ---
+
+<a id="section-3-sliding-window"></a>
 
 # 3. SLIDING WINDOW
 
@@ -465,6 +731,8 @@ def min_window(s: str, t: str) -> str:
 
 ---
 
+<a id="section-4-binary-search"></a>
+
 # 4. BINARY SEARCH
 
 ---
@@ -627,6 +895,8 @@ def min_eating_speed(piles: list[int], h: int) -> int:
 
 ---
 
+<a id="section-5-stacks"></a>
+
 # 5. STACKS
 
 ---
@@ -768,6 +1038,8 @@ class MinStack:
 
 ---
 
+<a id="section-6-queues"></a>
+
 # 6. QUEUES
 
 ---
@@ -867,6 +1139,8 @@ def max_sliding_window(nums: list[int], k: int) -> list[int]:
 **Intuition:** Monotonic deque keeps potential maxes in decreasing order. Front is always max.
 
 ---
+
+<a id="section-7-linked-lists"></a>
 
 # 7. LINKED LISTS
 
@@ -1009,6 +1283,8 @@ def merge_two_lists(list1, list2):
 
 ---
 
+<a id="section-8-trees-dfs"></a>
+
 # 8. TREES - DFS
 
 ---
@@ -1140,6 +1416,8 @@ def path_sum(root, target_sum: int) -> list[list[int]]:
 
 ---
 
+<a id="section-9-trees-bfs"></a>
+
 # 9. TREES - BFS
 
 ---
@@ -1210,6 +1488,8 @@ def right_side_view(root) -> list[int]:
 **Intuition:** BFS, take last (or first) node of each level.
 
 ---
+
+<a id="section-10-graphs-dfs"></a>
 
 # 10. GRAPHS - DFS
 
@@ -1329,6 +1609,8 @@ def pacific_atlantic(heights: list[list[int]]) -> list[list[int]]:
 
 ---
 
+<a id="section-11-graphs-bfs-shortest-path"></a>
+
 # 11. GRAPHS - BFS (SHORTEST PATH)
 
 ---
@@ -1412,6 +1694,8 @@ def ladder_length(begin_word: str, end_word: str, word_list: list[str]) -> int:
 
 ---
 
+<a id="section-12-topological-sort"></a>
+
 # 12. TOPOLOGICAL SORT
 
 ---
@@ -1486,6 +1770,8 @@ def find_order(num_courses: int, prerequisites: list[list[int]]) -> list[int]:
 **Intuition:** Kahn's algorithm. Process nodes with no dependencies first.
 
 ---
+
+<a id="section-13-heaps-priority-queue"></a>
 
 # 13. HEAPS / PRIORITY QUEUE
 
@@ -1590,6 +1876,8 @@ class MedianFinder:
 **Intuition:** Two heaps split data in half. Max heap for smaller half, min heap for larger half.
 
 ---
+
+<a id="section-14-backtracking"></a>
 
 # 14. BACKTRACKING
 
@@ -1806,6 +2094,411 @@ def solve_n_queens(n: int) -> list[list[str]]:
 
 ---
 
+<a id="section-15-advanced-graph-patterns"></a>
+
+# 15. ADVANCED GRAPH PATTERNS
+
+Use this decision table before reaching for a template:
+
+| Signal | Algorithm | Complexity |
+| ------ | --------- | ---------- |
+| Unweighted shortest path | BFS | O(V + E) |
+| Many sources start together | Multi-source BFS | O(V + E) |
+| Weights are only 0 or 1 | 0-1 BFS | O(V + E) |
+| Non-negative weights | Dijkstra | O((V + E) log V) |
+| Negative edges or at most K edges | Bellman-Ford | O(VE), or O(KE) |
+| All-pairs distances, small graph | Floyd-Warshall | O(V^3) |
+| Repeated merges/connectivity | Union-Find | Almost O(1) per operation |
+| Minimum total cost to connect all nodes | Kruskal / Prim MST | O(E log E) / O(E log V) |
+| Critical edges / strongly connected regions | Low-link DFS | O(V + E) |
+| Use every edge exactly once | Hierholzer | O(E) plus edge ordering |
+| Position plus keys/stops/resources | BFS/Dijkstra on full state | Depends on state count |
+
+---
+
+## Pattern 15A: Dijkstra - Non-Negative Weighted Shortest Path
+
+### Problem: Network Delay Time
+
+```python
+from collections import defaultdict
+import heapq
+
+def networkDelayTime(times, n, k):
+    graph = defaultdict(list)
+    for u, v, weight in times:
+        graph[u].append((v, weight))
+
+    distances = [float("inf")] * (n + 1)
+    distances[k] = 0
+    min_heap = [(0, k)]  # (distance, node)
+
+    while min_heap:
+        distance, node = heapq.heappop(min_heap)
+
+        # A better route was pushed after this stale entry.
+        if distance != distances[node]:
+            continue
+
+        for neighbour, weight in graph[node]:
+            candidate = distance + weight
+            if candidate < distances[neighbour]:
+                distances[neighbour] = candidate
+                heapq.heappush(min_heap, (candidate, neighbour))
+
+    answer = max(distances[1:])
+    return -1 if answer == float("inf") else answer
+```
+
+**Keywords:** "weighted shortest path", "minimum travel time", "non-negative costs"
+
+**Invariant:** when the current best distance is removed from the min-heap, no later path can improve it through non-negative edges. Do not mark a node visited when it is first **inserted**.
+
+**Complexity:** O((V + E) log V) time, O(V + E) space.
+
+---
+
+## Pattern 15B: 0-1 BFS - Binary Edge Weights
+
+### Problem: Minimum Obstacle Removal to Reach Corner
+
+```python
+from collections import deque
+
+def minimumObstacles(grid):
+    rows, cols = len(grid), len(grid[0])
+    distances = [[float("inf")] * cols for _ in range(rows)]
+    distances[0][0] = 0
+    queue = deque([(0, 0)])
+
+    for_pop = ((1, 0), (-1, 0), (0, 1), (0, -1))
+    while queue:
+        row, col = queue.popleft()
+        for dr, dc in for_pop:
+            next_row, next_col = row + dr, col + dc
+            if not (0 <= next_row < rows and 0 <= next_col < cols):
+                continue
+
+            weight = grid[next_row][next_col]
+            candidate = distances[row][col] + weight
+            if candidate >= distances[next_row][next_col]:
+                continue
+
+            distances[next_row][next_col] = candidate
+            if weight == 0:
+                queue.appendleft((next_row, next_col))
+            else:
+                queue.append((next_row, next_col))
+
+    return distances[rows - 1][cols - 1]
+```
+
+**Keywords:** "0 or 1 cost", "free versus paid edge", "minimum reversals/obstacles"
+
+**Intuition:** a zero-cost transition belongs at the front; a cost-one transition belongs at the back. The deque maintains Dijkstra's distance order without a heap.
+
+**Complexity:** O(V + E) time and O(V) space.
+
+---
+
+## Pattern 15C: Bellman-Ford by Layers - Bounded Stops
+
+### Problem: Cheapest Flights Within K Stops
+
+```python
+def findCheapestPrice(n, flights, src, dst, k):
+    costs = [float("inf")] * n
+    costs[src] = 0
+
+    # At most k stops means at most k + 1 edges.
+    for _ in range(k + 1):
+        next_costs = costs.copy()
+        for source, target, price in flights:
+            if costs[source] != float("inf"):
+                next_costs[target] = min(
+                    next_costs[target], costs[source] + price
+                )
+        costs = next_costs
+
+    return -1 if costs[dst] == float("inf") else costs[dst]
+```
+
+**Keywords:** "negative weights", "at most K edges/stops", "relax every edge"
+
+**Critical detail:** read from `costs` and write to `next_costs`. Updating one array in place could chain multiple flights in the same round and violate the edge limit.
+
+**Complexity:** O(KE) time and O(V) space.
+
+---
+
+## Pattern 15D: Union-Find - Dynamic Connectivity and Cycle Detection
+
+### Problem: Redundant Connection
+
+```python
+class UnionFind:
+    def __init__(self, size):
+        self.parent = list(range(size))
+        self.component_size = [1] * size
+
+    def find(self, node):
+        while node != self.parent[node]:
+            self.parent[node] = self.parent[self.parent[node]]
+            node = self.parent[node]
+        return node
+
+    def union(self, first, second):
+        root_first = self.find(first)
+        root_second = self.find(second)
+        if root_first == root_second:
+            return False
+
+        if self.component_size[root_first] < self.component_size[root_second]:
+            root_first, root_second = root_second, root_first
+        self.parent[root_second] = root_first
+        self.component_size[root_first] += self.component_size[root_second]
+        return True
+
+def findRedundantConnection(edges):
+    union_find = UnionFind(len(edges) + 1)
+    for first, second in edges:
+        if not union_find.union(first, second):
+            return [first, second]
+    return []
+```
+
+**Keywords:** "merge groups", "redundant edge", "connected after additions", "same component"
+
+**Intuition:** `union` returns false exactly when an undirected edge closes a cycle. Path compression plus union by size gives near-constant amortised operations.
+
+---
+
+## Pattern 15E: Prim's Minimum Spanning Tree
+
+### Problem: Min Cost to Connect All Points
+
+```python
+import heapq
+
+def minCostConnectPoints(points):
+    number_of_points = len(points)
+    in_tree = [False] * number_of_points
+    min_heap = [(0, 0)]  # (edge cost, destination)
+    total_cost = 0
+    used = 0
+
+    while used < number_of_points:
+        cost, point = heapq.heappop(min_heap)
+        if in_tree[point]:
+            continue
+
+        in_tree[point] = True
+        total_cost += cost
+        used += 1
+
+        x1, y1 = points[point]
+        for neighbour, (x2, y2) in enumerate(points):
+            if not in_tree[neighbour]:
+                distance = abs(x1 - x2) + abs(y1 - y2)
+                heapq.heappush(min_heap, (distance, neighbour))
+
+    return total_cost
+```
+
+**Keywords:** "connect every node", "minimum total cost", "network/cable plan"
+
+**MST versus shortest path:** an MST minimises the sum of chosen edges across the whole network; Dijkstra minimises routes from one source. They answer different questions.
+
+**Complexity:** O(V^2 log V) for this implicit complete graph; standard adjacency-list Prim is O(E log V).
+
+---
+
+## Pattern 15F: Bipartite Graph - Two-Colouring
+
+### Problem: Is Graph Bipartite?
+
+```python
+from collections import deque
+
+def isBipartite(graph):
+    colour = [-1] * len(graph)
+
+    for start in range(len(graph)):  # handles disconnected graphs
+        if colour[start] != -1:
+            continue
+
+        colour[start] = 0
+        queue = deque([start])
+        while queue:
+            node = queue.popleft()
+            for neighbour in graph[node]:
+                if colour[neighbour] == -1:
+                    colour[neighbour] = colour[node] ^ 1
+                    queue.append(neighbour)
+                elif colour[neighbour] == colour[node]:
+                    return False
+
+    return True
+```
+
+**Keywords:** "split into two groups", "enemies", "alternate", "odd cycle"
+
+**Invariant:** every edge must cross from colour 0 to colour 1. An undirected graph is bipartite exactly when it has no odd-length cycle.
+
+---
+
+## Pattern 15G: Tarjan Low-Link - Bridges
+
+### Problem: Critical Connections in a Network
+
+```python
+def criticalConnections(n, connections):
+    graph = [[] for _ in range(n)]
+    for edge_id, (first, second) in enumerate(connections):
+        graph[first].append((second, edge_id))
+        graph[second].append((first, edge_id))
+
+    discovery = [-1] * n
+    low = [0] * n
+    timer = 0
+    bridges = []
+
+    def dfs(node, parent_edge):
+        nonlocal timer
+        discovery[node] = low[node] = timer
+        timer += 1
+
+        for neighbour, edge_id in graph[node]:
+            if edge_id == parent_edge:
+                continue
+            if discovery[neighbour] == -1:
+                dfs(neighbour, edge_id)
+                low[node] = min(low[node], low[neighbour])
+                if low[neighbour] > discovery[node]:
+                    bridges.append([node, neighbour])
+            else:
+                low[node] = min(low[node], discovery[neighbour])
+
+    for node in range(n):
+        if discovery[node] == -1:
+            dfs(node, -1)
+    return bridges
+```
+
+**Keywords:** "critical connection", "single point of failure", "disconnect if removed"
+
+**Meaning of `low[v]`:** the earliest discovery time reachable from `v`'s DFS subtree without using its parent edge. If `low[v] > discovery[u]`, the edge `u-v` has no alternate route and is a bridge.
+
+**Complexity:** O(V + E) time and O(V + E) space.
+
+---
+
+## Pattern 15H: State-Space BFS - Node Plus Bitmask
+
+### Problem: Shortest Path to Get All Keys
+
+```python
+from collections import deque
+
+def shortestPathAllKeys(grid):
+    rows, cols = len(grid), len(grid[0])
+    all_keys = 0
+    start = None
+
+    for row in range(rows):
+        for col in range(cols):
+            cell = grid[row][col]
+            if cell == "@":
+                start = (row, col)
+            elif "a" <= cell <= "f":
+                all_keys |= 1 << (ord(cell) - ord("a"))
+
+    queue = deque([(start[0], start[1], 0, 0)])  # row, col, mask, steps
+    visited = {(start[0], start[1], 0)}
+
+    while queue:
+        row, col, keys, steps = queue.popleft()
+        if keys == all_keys:
+            return steps
+
+        for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            next_row, next_col = row + dr, col + dc
+            if not (0 <= next_row < rows and 0 <= next_col < cols):
+                continue
+            cell = grid[next_row][next_col]
+            if cell == "#":
+                continue
+
+            next_keys = keys
+            if "a" <= cell <= "f":
+                next_keys |= 1 << (ord(cell) - ord("a"))
+            if "A" <= cell <= "F" and not (
+                keys & (1 << (ord(cell) - ord("A")))
+            ):
+                continue
+
+            state = (next_row, next_col, next_keys)
+            if state not in visited:
+                visited.add(state)
+                queue.append((next_row, next_col, next_keys, steps + 1))
+
+    return -1
+```
+
+**Keywords:** "keys/locks", "collect all", "remaining eliminations", "coupons/stops"
+
+**The hard-problem unlock:** `(row, col)` is not the vertex; `(row, col, keys)` is. Reaching the same cell with different keys creates different future moves.
+
+---
+
+## Pattern 15I: Eulerian Path - Use Every Edge Once
+
+### Problem: Reconstruct Itinerary
+
+```python
+from collections import defaultdict
+
+def findItinerary(tickets):
+    graph = defaultdict(list)
+    # Reverse sorting lets pop() take the smallest lexical destination.
+    for source, destination in sorted(tickets, reverse=True):
+        graph[source].append(destination)
+
+    route = []
+
+    def visit(airport):
+        while graph[airport]:
+            visit(graph[airport].pop())
+        route.append(airport)
+
+    visit("JFK")
+    return route[::-1]
+```
+
+**Keywords:** "use every ticket/edge exactly once", "arrange pairs", "valid itinerary"
+
+**Intuition:** Hierholzer consumes edges until stuck, then appends nodes during backtracking. The route is therefore built backwards. Eulerian uses every **edge** once; Hamiltonian uses every **vertex** once.
+
+---
+
+## Advanced Graph Interview Checklist
+
+1. Define the real vertex and edge—including hidden state.
+2. State whether edges are directed, weighted, and possibly negative.
+3. Match weights to BFS, 0-1 BFS, Dijkstra, Bellman-Ford, or DAG relaxation.
+4. Build both directions only for undirected edges.
+5. Cover every component when no single source is guaranteed.
+6. In Dijkstra, skip stale heap entries; in BFS, mark visited when enqueuing.
+7. Distinguish MST total cost from single-source shortest paths.
+8. Use iterative DFS if recursion depth can exceed Python's limit.
+9. Give complexity in V and E—or the expanded state count.
+
+**Next drills:** Accounts Merge (DSU), Swim in Rising Water (Dijkstra), Alien Dictionary (topological sort), Network Delay Time, Min Cost to Connect All Points, Critical Connections, Reconstruct Itinerary, and Shortest Path to Get All Keys.
+
+---
+
+<a id="section-quick-reference-pattern-selection"></a>
+
 # Quick Reference: Pattern Selection
 
 | Keywords                        | Pattern                              |
@@ -1832,5 +2525,13 @@ def solve_n_queens(n: int) -> list[list[str]]:
 | "islands/connected"             | DFS flood fill                       |
 | "shortest path unweighted"      | BFS                                  |
 | "prerequisites/dependencies"    | Topological sort                     |
+| "weighted shortest path"        | Dijkstra                             |
+| "weights are only 0/1"          | 0-1 BFS                              |
+| "negative edges/at most k edges"| Bellman-Ford                         |
+| "merge groups/redundant edge"   | Union-Find                           |
+| "minimum total connection cost" | Minimum spanning tree                |
+| "critical connection"           | Tarjan low-link                      |
+| "use every edge exactly once"   | Eulerian path / Hierholzer           |
+| "node plus keys/stops/resources"| State-space graph                    |
 | "kth largest/merge k sorted"    | Heap                                 |
 | "all combinations/permutations" | Backtracking                         |

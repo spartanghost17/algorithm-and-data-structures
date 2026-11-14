@@ -1,6 +1,347 @@
 # DSA Patterns: Problem Statements, Java Solutions & Intuition
 
+<a id="quick-navigation"></a>
+
+## Quick navigation
+
+- [0. Java Language & Data Structure Cheat Sheet](#section-0-java-language-and-data-structure-cheat-sheet)
+- [1. Arrays & Hashing](#section-1-arrays-and-hashing)
+- [2. Two Pointers](#section-2-two-pointers)
+- [3. Sliding Window](#section-3-sliding-window)
+- [4. Binary Search](#section-4-binary-search)
+- [5. Stack](#section-5-stack)
+- [6. Queue / BFS](#section-6-queue-bfs)
+- [7. Linked List](#section-7-linked-list)
+- [8. Trees - DFS](#section-8-trees-dfs)
+- [9. Trees - BFS](#section-9-trees-bfs)
+- [10. Graphs - DFS](#section-10-graphs-dfs)
+- [11. Graphs - BFS (Shortest Path)](#section-11-graphs-bfs-shortest-path)
+- [12. Heap / Priority Queue](#section-12-heap-priority-queue)
+- [13. Backtracking](#section-13-backtracking)
+- [14. Graph - Topological Sort](#section-14-graph-topological-sort)
+- [Graph Mastery Expansion: One Question Per Advanced Pattern](#section-graph-mastery-expansion-one-question-per-advanced-pattern)
+- [Python vs Java for Interviews](#section-python-vs-java-for-interviews)
+
+
 ---
+
+<a id="section-0-java-language-and-data-structure-cheat-sheet"></a>
+
+## 0. Java Language & Data Structure Cheat Sheet
+
+### Imports, methods, and variables
+
+```java
+import java.util.*;
+
+public int solve(int[] nums) {
+    int answer = 0;
+    return answer;
+}
+
+int count = 0;
+long total = 0L;               // use long for sums/distances that may overflow int
+double ratio = 0.0;
+boolean found = false;
+char letter = 'a';
+String text = "graph";
+
+int temporary = left;          // swap
+left = right;
+right = temporary;
+```
+
+### Loops
+
+```java
+for (int index = 0; index < nums.length; index++) {
+    int value = nums[index];
+}
+
+for (int index = nums.length - 1; index >= 0; index--) {
+    int value = nums[index];
+}
+
+for (int value : nums) {       // enhanced for: values, not indices
+}
+
+for (int row = 0; row < grid.length; row++) {
+    for (int col = 0; col < grid[0].length; col++) {
+    }
+}
+
+for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+    int key = entry.getKey();
+    int value = entry.getValue();
+}
+
+Iterator<Integer> iterator = set.iterator();
+while (iterator.hasNext()) {
+    int value = iterator.next();
+    // iterator.remove();        // safe removal during this iteration
+}
+
+while (left <= right) {
+    left++;
+}
+// break exits one loop; continue skips to its next iteration.
+```
+
+### Primitive arrays and matrices
+
+```java
+int[] nums = {3, 1, 2};
+int[] zeros = new int[n];
+int[][] matrix = new int[rows][cols];
+
+int length = nums.length;
+int value = nums[index];
+nums[index] = 99;
+
+Arrays.fill(nums, -1);
+Arrays.sort(nums);                         // ascending, mutates array
+int[] copy = Arrays.copyOf(nums, nums.length);
+int[] slice = Arrays.copyOfRange(nums, from, to); // to excluded
+
+int position = Arrays.binarySearch(nums, target); // sorted input; negative if absent
+boolean exists = position >= 0;
+
+for (int[] row : matrix) Arrays.fill(row, -1);
+```
+
+Java arrays have fixed length: you cannot append or remove. Use `ArrayList` when the size changes.
+
+### ArrayList / dynamic array
+
+```java
+List<Integer> list = new ArrayList<>();
+list.add(value);                    // append
+list.add(index, value);             // insert at index: O(n)
+list.addAll(other);
+
+int value = list.get(index);
+list.set(index, newValue);          // replace
+int removed = list.remove(index);   // remove by index
+boolean didRemove = list.remove(Integer.valueOf(target)); // remove by value
+boolean exists = list.contains(target);
+int position = list.indexOf(target);
+
+int size = list.size();
+boolean empty = list.isEmpty();
+list.clear();
+
+list.sort(Integer::compareTo);
+list.sort(Comparator.reverseOrder());
+pairs.sort(Comparator.comparingInt(pair -> pair[1]));
+
+List<Integer> copy = new ArrayList<>(list);
+List<Integer> view = list.subList(from, to); // backed by original list
+```
+
+**Classic trap:** `list.remove(2)` removes index 2, not the value 2. Use `remove(Integer.valueOf(2))`.
+
+### Strings and StringBuilder
+
+```java
+String text = "graph";
+int length = text.length();
+char character = text.charAt(index);
+String substring = text.substring(start, end); // end excluded
+boolean contains = text.contains("rap");
+boolean starts = text.startsWith("gr");
+int position = text.indexOf('a');              // -1 if absent
+String[] parts = text.split(",");
+String joined = String.join("-", parts);
+String trimmed = text.trim();
+String replaced = text.replace('a', 'b');
+
+boolean sameContent = first.equals(second);     // never use == for content
+int ordering = first.compareTo(second);
+char[] characters = text.toCharArray();
+String fromCharacters = new String(characters);
+int number = Integer.parseInt("42");
+String digits = String.valueOf(42);
+
+StringBuilder builder = new StringBuilder();
+builder.append("ab");
+builder.append(value);
+builder.insert(index, value);
+builder.setCharAt(index, 'X');
+builder.deleteCharAt(index);
+builder.delete(start, end);
+builder.reverse();
+String result = builder.toString();
+```
+
+Strings are immutable. Use `StringBuilder` for repeated edits or concatenation inside loops.
+
+### HashMap
+
+```java
+Map<Integer, Integer> map = new HashMap<>();
+map.put(key, value);                       // add or replace
+map.putIfAbsent(key, value);
+
+int value = map.get(key);                  // may unbox null and throw
+int safeValue = map.getOrDefault(key, 0);
+boolean hasKey = map.containsKey(key);
+boolean hasValue = map.containsValue(value); // O(n)
+
+map.merge(key, 1, Integer::sum);            // frequency increment
+Map<Integer, List<Integer>> groups = new HashMap<>();
+groups.computeIfAbsent(key, ignored -> new ArrayList<>()).add(value);
+
+Integer removed = map.remove(key);
+boolean removedPair = map.remove(key, value);
+int size = map.size();
+map.clear();
+
+for (int key : map.keySet()) {
+    int mappedValue = map.get(key);
+}
+for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+    // entry.getKey(), entry.getValue()
+}
+```
+
+Average `HashMap` lookup/add/remove is O(1). Use `TreeMap` when keys must stay sorted: operations become O(log n).
+
+### HashSet
+
+```java
+Set<Integer> seen = new HashSet<>();
+boolean added = seen.add(value);
+boolean exists = seen.contains(value);
+boolean removed = seen.remove(value);
+seen.addAll(values);
+seen.removeAll(values);
+seen.retainAll(values);             // intersection, mutates seen
+int size = seen.size();
+boolean empty = seen.isEmpty();
+seen.clear();
+
+Set<Integer> ordered = new TreeSet<>(); // sorted, O(log n) operations
+```
+
+### Stack, queue, and deque
+
+```java
+// Stack: prefer Deque over the legacy Stack class
+Deque<Integer> stack = new ArrayDeque<>();
+stack.push(value);
+int top = stack.peek();
+int stackRemoved = stack.pop();
+boolean stackEmpty = stack.isEmpty();
+
+// Queue
+Queue<Integer> queue = new ArrayDeque<>();
+queue.offer(value);                  // enqueue
+int front = queue.peek();
+int queueRemoved = queue.poll();     // dequeue
+boolean queueEmpty = queue.isEmpty();
+
+// Double-ended queue
+Deque<Integer> deque = new ArrayDeque<>();
+deque.offerFirst(value);
+deque.offerLast(value);
+int first = deque.peekFirst();
+int last = deque.peekLast();
+int removedFirst = deque.pollFirst();
+int removedLast = deque.pollLast();
+```
+
+The `offer/poll/peek` family returns a status or `null` rather than throwing on ordinary queue failure. `ArrayDeque` does not allow `null`.
+
+### Heap / PriorityQueue
+
+```java
+PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+minHeap.offer(value);
+int smallest = minHeap.peek();
+int removed = minHeap.poll();
+
+PriorityQueue<Integer> maxHeap =
+    new PriorityQueue<>(Comparator.reverseOrder());
+
+PriorityQueue<int[]> byDistance =
+    new PriorityQueue<>(Comparator.comparingInt(item -> item[0]));
+byDistance.offer(new int[]{distance, node});
+int[] next = byDistance.poll();
+
+PriorityQueue<long[]> safeLongComparator =
+    new PriorityQueue<>(Comparator.comparingLong(item -> item[0]));
+```
+
+Push/pop is O(log n), peek is O(1). Prefer `Integer.compare(a, b)` or comparator helpers over `a - b`, which can overflow.
+
+### Linked structures and graphs
+
+```java
+class ListNode {
+    int val;
+    ListNode next;
+    ListNode(int val) { this.val = val; }
+}
+
+class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+    TreeNode(int val) { this.val = val; }
+}
+
+// Unweighted adjacency list
+List<Integer>[] graph = new ArrayList[n];
+for (int node = 0; node < n; node++) graph[node] = new ArrayList<>();
+for (int[] edge : edges) {
+    int first = edge[0], second = edge[1];
+    graph[first].add(second);
+    graph[second].add(first);         // omit for a directed graph
+}
+
+// Weighted: each entry is {neighbour, weight}
+List<int[]>[] weighted = new ArrayList[n];
+for (int node = 0; node < n; node++) weighted[node] = new ArrayList<>();
+weighted[source].add(new int[]{target, weight});
+
+boolean[] visited = new boolean[n];
+int[][] directions4 = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+```
+
+### Conversions and interview traps
+
+```java
+int[] primitive = list.stream().mapToInt(Integer::intValue).toArray();
+List<Integer> boxed = new ArrayList<>();
+for (int value : nums) boxed.add(value);
+
+int infinity = Integer.MAX_VALUE;
+long safeInfinity = Long.MAX_VALUE / 4; // leaves room for addition
+```
+
+- Use `.length` for arrays, `.length()` for strings, and `.size()` for collections.
+- Generics cannot use primitives: write `List<Integer>`, not `List<int>`.
+- Check for `null` before unboxing values returned from maps or queues.
+- Modifying a collection inside enhanced `for` usually throws `ConcurrentModificationException`; use an iterator or collect changes separately.
+- Recursion can overflow the JVM stack on deep graphs; use iterative DFS when input depth is large.
+
+### Complexity reminders
+
+| Structure | Add | Remove | Membership / lookup | Peek |
+| --------- | --- | ------ | ------------------- | ---- |
+| array | — | — | O(n), index O(1) | O(1) |
+| `ArrayList` end | O(1)* | O(1) | O(n), index O(1) | O(1) |
+| `HashMap` / `HashSet` average | O(1) | O(1) | O(1) | — |
+| `TreeMap` / `TreeSet` | O(log n) | O(log n) | O(log n) | O(log n) |
+| `ArrayDeque` ends | O(1) | O(1) | O(n) | O(1) |
+| `PriorityQueue` | O(log n) | O(log n) | O(n) | O(1) |
+
+*Amortised.
+
+---
+
+
+<a id="section-1-arrays-and-hashing"></a>
 
 ## 1. Arrays & Hashing
 
@@ -55,6 +396,8 @@ The brute force is O(n²): check every pair. But notice: if we need `a + b = tar
 **Mental Model:** "I've seen these numbers before, is my partner already waiting for me?"
 
 ---
+
+<a id="section-2-two-pointers"></a>
 
 ## 2. Two Pointers
 
@@ -112,6 +455,8 @@ Start with the widest container (pointers at both ends). The only way to potenti
 **Mental Model:** "I have maximum width. I can only improve by trading width for height. Always sacrifice the weaker side."
 
 ---
+
+<a id="section-3-sliding-window"></a>
 
 ## 3. Sliding Window
 
@@ -201,6 +546,8 @@ We want contiguous characters (substring), so sliding window fits. Expand the ri
 
 ---
 
+<a id="section-4-binary-search"></a>
+
 ## 4. Binary Search
 
 ### Problem: Search in Rotated Sorted Array
@@ -269,6 +616,8 @@ In a rotated sorted array, at least one half (left or right of mid) is always pr
 
 ---
 
+<a id="section-5-stack"></a>
+
 ## 5. Stack
 
 ### Problem: Daily Temperatures
@@ -321,6 +670,8 @@ Each day is "waiting" for a warmer day. Push days onto the stack. When a warmer 
 **Mental Model:** "Each day goes into a waiting room (stack). When a hotter day arrives, it 'answers' everyone in the waiting room who was cooler."
 
 ---
+
+<a id="section-6-queue-bfs"></a>
 
 ## 6. Queue / BFS
 
@@ -415,6 +766,8 @@ This is a multi-source BFS. All rotten oranges start spreading simultaneously—
 
 ---
 
+<a id="section-7-linked-list"></a>
+
 ## 7. Linked List
 
 ### Problem: Reverse Linked List
@@ -491,6 +844,8 @@ public class ReverseLinkedListRecursive {
 
 ---
 
+<a id="section-8-trees-dfs"></a>
+
 ## 8. Trees - DFS
 
 ### Problem: Lowest Common Ancestor of Binary Tree
@@ -547,6 +902,8 @@ DFS down the tree. If we find p or q, return it upward. If a node receives non-n
 **Mental Model:** "Send scouts down both paths. If both scouts report back to a node, that node is the meeting point."
 
 ---
+
+<a id="section-9-trees-bfs"></a>
 
 ## 9. Trees - BFS
 
@@ -605,6 +962,8 @@ BFS naturally visits nodes level by level. The key trick: before processing a le
 **Mental Model:** "Process the queue in batches. Each batch = one level."
 
 ---
+
+<a id="section-10-graphs-dfs"></a>
 
 ## 10. Graphs - DFS
 
@@ -679,6 +1038,8 @@ Each '1' we find could be a new island. Start DFS from it to mark all connected 
 **Mental Model:** "When I find land, I've discovered an island. Flood-fill to mark the whole island as explored, then keep looking for undiscovered islands."
 
 ---
+
+<a id="section-11-graphs-bfs-shortest-path"></a>
 
 ## 11. Graphs - BFS (Shortest Path)
 
@@ -757,6 +1118,8 @@ BFS explores all cells at distance K before any cell at distance K+1. So the fir
 
 ---
 
+<a id="section-12-heap-priority-queue"></a>
+
 ## 12. Heap / Priority Queue
 
 ### Problem: Merge K Sorted Lists
@@ -825,6 +1188,8 @@ At any moment, the next smallest element must be the head of one of the K lists.
 
 ---
 
+<a id="section-13-backtracking"></a>
+
 ## 13. Backtracking
 
 ### Problem: Combination Sum
@@ -891,6 +1256,8 @@ Backtracking = controlled brute force. At each step, try adding each candidate. 
 **Mental Model:** "Build combinations one choice at a time. If it works, save it. If not, undo the last choice and try another. Never go backwards in the candidate list to avoid duplicates."
 
 ---
+
+<a id="section-14-graph-topological-sort"></a>
 
 ## 14. Graph - Topological Sort
 
@@ -973,6 +1340,343 @@ Model as a directed graph: edge from A to B means "A must come before B". Topolo
 **Mental Model:** "Keep taking courses with no unfulfilled prerequisites. Cross them off, update prerequisites of remaining courses. If we empty the list, we're done. If we get stuck with everyone waiting on someone else, there's a cycle."
 
 ---
+
+<a id="section-graph-mastery-expansion-one-question-per-advanced-pattern"></a>
+
+# Graph Mastery Expansion: One Question Per Advanced Pattern
+
+## G1. Dijkstra - Network Delay Time
+
+**Use when:** shortest paths have non-negative, unequal weights.
+
+```java
+public int networkDelayTime(int[][] times, int n, int start) {
+    List<int[]>[] graph = new ArrayList[n + 1];
+    for (int node = 1; node <= n; node++) graph[node] = new ArrayList<>();
+    for (int[] edge : times) graph[edge[0]].add(new int[]{edge[1], edge[2]});
+
+    long[] distance = new long[n + 1];
+    Arrays.fill(distance, Long.MAX_VALUE);
+    distance[start] = 0;
+    PriorityQueue<long[]> minHeap =
+        new PriorityQueue<>(Comparator.comparingLong(item -> item[0]));
+    minHeap.offer(new long[]{0, start});
+
+    while (!minHeap.isEmpty()) {
+        long[] current = minHeap.poll();
+        long currentDistance = current[0];
+        int node = (int) current[1];
+        if (currentDistance != distance[node]) continue;
+
+        for (int[] edge : graph[node]) {
+            int neighbour = edge[0];
+            long candidate = currentDistance + edge[1];
+            if (candidate < distance[neighbour]) {
+                distance[neighbour] = candidate;
+                minHeap.offer(new long[]{candidate, neighbour});
+            }
+        }
+    }
+
+    long answer = 0;
+    for (int node = 1; node <= n; node++) answer = Math.max(answer, distance[node]);
+    return answer == Long.MAX_VALUE ? -1 : (int) answer;
+}
+```
+
+**Invariant:** with non-negative weights, removing the current minimum distance finalises it. Skip stale heap entries rather than marking a node when inserted.
+
+**Complexity:** O((V + E) log V) time, O(V + E) space.
+
+---
+
+## G2. 0-1 BFS - Minimum Obstacle Removal
+
+**Use when:** every edge weight is exactly 0 or 1.
+
+```java
+public int minimumObstacles(int[][] grid) {
+    int rows = grid.length, cols = grid[0].length;
+    int[][] distance = new int[rows][cols];
+    for (int[] row : distance) Arrays.fill(row, Integer.MAX_VALUE);
+    distance[0][0] = 0;
+    Deque<int[]> deque = new ArrayDeque<>();
+    deque.offerFirst(new int[]{0, 0});
+    int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+
+    while (!deque.isEmpty()) {
+        int[] current = deque.pollFirst();
+        int row = current[0], col = current[1];
+        for (int[] direction : directions) {
+            int nextRow = row + direction[0], nextCol = col + direction[1];
+            if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) continue;
+            int weight = grid[nextRow][nextCol];
+            int candidate = distance[row][col] + weight;
+            if (candidate >= distance[nextRow][nextCol]) continue;
+            distance[nextRow][nextCol] = candidate;
+            if (weight == 0) deque.offerFirst(new int[]{nextRow, nextCol});
+            else deque.offerLast(new int[]{nextRow, nextCol});
+        }
+    }
+    return distance[rows - 1][cols - 1];
+}
+```
+
+Free moves go to the front and cost-one moves to the back, preserving shortest-distance order in O(V + E).
+
+---
+
+## G3. Union-Find - Redundant Connection
+
+**Use when:** edges arrive incrementally and you repeatedly merge or query components.
+
+```java
+class UnionFind {
+    private final int[] parent;
+    private final int[] size;
+
+    UnionFind(int n) {
+        parent = new int[n];
+        size = new int[n];
+        for (int node = 0; node < n; node++) {
+            parent[node] = node;
+            size[node] = 1;
+        }
+    }
+
+    int find(int node) {
+        if (parent[node] != node) parent[node] = find(parent[node]);
+        return parent[node];
+    }
+
+    boolean union(int first, int second) {
+        int rootFirst = find(first), rootSecond = find(second);
+        if (rootFirst == rootSecond) return false;
+        if (size[rootFirst] < size[rootSecond]) {
+            int temporary = rootFirst;
+            rootFirst = rootSecond;
+            rootSecond = temporary;
+        }
+        parent[rootSecond] = rootFirst;
+        size[rootFirst] += size[rootSecond];
+        return true;
+    }
+}
+
+public int[] findRedundantConnection(int[][] edges) {
+    UnionFind unionFind = new UnionFind(edges.length + 1);
+    for (int[] edge : edges) {
+        if (!unionFind.union(edge[0], edge[1])) return edge;
+    }
+    return new int[0];
+}
+```
+
+An undirected edge closes a cycle exactly when its endpoints already have the same representative. Complexity is O(E alpha(V)), effectively linear.
+
+---
+
+## G4. Minimum Spanning Tree - Min Cost to Connect All Points
+
+**Use when:** connect every node while minimising the **total** selected edge cost.
+
+```java
+public int minCostConnectPoints(int[][] points) {
+    int n = points.length;
+    boolean[] inTree = new boolean[n];
+    PriorityQueue<int[]> minHeap =
+        new PriorityQueue<>(Comparator.comparingInt(edge -> edge[0]));
+    minHeap.offer(new int[]{0, 0});
+    int totalCost = 0, used = 0;
+
+    while (used < n) {
+        int[] edge = minHeap.poll();
+        int cost = edge[0], point = edge[1];
+        if (inTree[point]) continue;
+        inTree[point] = true;
+        totalCost += cost;
+        used++;
+
+        for (int neighbour = 0; neighbour < n; neighbour++) {
+            if (!inTree[neighbour]) {
+                int distance = Math.abs(points[point][0] - points[neighbour][0])
+                    + Math.abs(points[point][1] - points[neighbour][1]);
+                minHeap.offer(new int[]{distance, neighbour});
+            }
+        }
+    }
+    return totalCost;
+}
+```
+
+**Key distinction:** an MST minimises total network cost; Dijkstra minimises path costs from one source.
+
+---
+
+## G5. Tarjan Low-Link - Critical Connections
+
+**Use when:** removing one undirected edge may disconnect the network.
+
+```java
+class BridgeFinder {
+    private List<int[]>[] graph;
+    private int[] discovery;
+    private int[] low;
+    private int timer;
+    private final List<List<Integer>> bridges = new ArrayList<>();
+
+    public List<List<Integer>> criticalConnections(
+        int n, List<List<Integer>> connections
+    ) {
+        bridges.clear();
+        timer = 0;
+        graph = new ArrayList[n];
+        for (int node = 0; node < n; node++) graph[node] = new ArrayList<>();
+        for (int edgeId = 0; edgeId < connections.size(); edgeId++) {
+            int first = connections.get(edgeId).get(0);
+            int second = connections.get(edgeId).get(1);
+            graph[first].add(new int[]{second, edgeId});
+            graph[second].add(new int[]{first, edgeId});
+        }
+        discovery = new int[n];
+        Arrays.fill(discovery, -1);
+        low = new int[n];
+
+        for (int node = 0; node < n; node++) {
+            if (discovery[node] == -1) dfs(node, -1);
+        }
+        return bridges;
+    }
+
+    private void dfs(int node, int parentEdge) {
+        discovery[node] = low[node] = timer++;
+        for (int[] edge : graph[node]) {
+            int neighbour = edge[0], edgeId = edge[1];
+            if (edgeId == parentEdge) continue;
+            if (discovery[neighbour] == -1) {
+                dfs(neighbour, edgeId);
+                low[node] = Math.min(low[node], low[neighbour]);
+                if (low[neighbour] > discovery[node]) {
+                    bridges.add(Arrays.asList(node, neighbour));
+                }
+            } else {
+                low[node] = Math.min(low[node], discovery[neighbour]);
+            }
+        }
+    }
+}
+```
+
+`low[v] > discovery[u]` means the subtree at `v` cannot bypass edge `u-v`. Parent edge IDs keep parallel edges correct.
+
+---
+
+## G6. State-Space BFS - Shortest Path to Get All Keys
+
+**Use when:** location alone does not determine the legal next moves.
+
+```java
+public int shortestPathAllKeys(String[] grid) {
+    int rows = grid.length, cols = grid[0].length();
+    int startRow = 0, startCol = 0, allKeys = 0;
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < cols; col++) {
+            char cell = grid[row].charAt(col);
+            if (cell == '@') { startRow = row; startCol = col; }
+            else if (cell >= 'a' && cell <= 'f') allKeys |= 1 << (cell - 'a');
+        }
+    }
+
+    Queue<int[]> queue = new ArrayDeque<>();
+    queue.offer(new int[]{startRow, startCol, 0});
+    boolean[][][] visited = new boolean[rows][cols][64];
+    visited[startRow][startCol][0] = true;
+    int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    int steps = 0;
+
+    while (!queue.isEmpty()) {
+        for (int levelSize = queue.size(); levelSize > 0; levelSize--) {
+            int[] state = queue.poll();
+            int row = state[0], col = state[1], keys = state[2];
+            if (keys == allKeys) return steps;
+            for (int[] direction : directions) {
+                int nextRow = row + direction[0], nextCol = col + direction[1];
+                if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) continue;
+                char cell = grid[nextRow].charAt(nextCol);
+                if (cell == '#') continue;
+                int nextKeys = keys;
+                if (cell >= 'a' && cell <= 'f') nextKeys |= 1 << (cell - 'a');
+                if (cell >= 'A' && cell <= 'F' && (keys & (1 << (cell - 'A'))) == 0) continue;
+                if (!visited[nextRow][nextCol][nextKeys]) {
+                    visited[nextRow][nextCol][nextKeys] = true;
+                    queue.offer(new int[]{nextRow, nextCol, nextKeys});
+                }
+            }
+        }
+        steps++;
+    }
+    return -1;
+}
+```
+
+**The unlock:** the vertex is `(row, col, keys)`, not merely `(row, col)`. Complexity is measured on the expanded state graph.
+
+---
+
+## G7. Eulerian Path - Reconstruct Itinerary
+
+**Use when:** every edge/ticket/pair must be used exactly once.
+
+```java
+public List<String> findItinerary(List<List<String>> tickets) {
+    Map<String, PriorityQueue<String>> graph = new HashMap<>();
+    for (List<String> ticket : tickets) {
+        graph.computeIfAbsent(ticket.get(0), ignored -> new PriorityQueue<>())
+             .offer(ticket.get(1));
+    }
+    LinkedList<String> route = new LinkedList<>();
+    buildRoute("JFK", graph, route);
+    return route;
+}
+
+private void buildRoute(
+    String airport,
+    Map<String, PriorityQueue<String>> graph,
+    LinkedList<String> route
+) {
+    PriorityQueue<String> destinations = graph.get(airport);
+    while (destinations != null && !destinations.isEmpty()) {
+        buildRoute(destinations.poll(), graph, route);
+    }
+    route.addFirst(airport);
+}
+```
+
+Hierholzer builds the route backward by adding a vertex only when it has no unused outgoing edges. Eulerian means every edge once; Hamiltonian means every vertex once.
+
+---
+
+## Advanced Graph Selection Card
+
+| Clue | Reach for |
+| ---- | --------- |
+| First/nearest/fewest steps; equal edges | BFS |
+| Many sources spread simultaneously | Multi-source BFS |
+| Weights only 0/1 | 0-1 BFS |
+| Non-negative unequal weights | Dijkstra |
+| Negative edges or bounded edge count | Bellman-Ford |
+| Dependencies / DAG path or count | Topological sort + DP |
+| Merge groups / redundant edge | Union-Find |
+| Minimum total connection cost | MST |
+| Critical edge | Low-link DFS |
+| Use every edge once | Hierholzer |
+| Keys, stops, coupons, parity, resource | Expand the state |
+
+Always state: the vertex, the edge, direction, weight rules, when a distance is final, and complexity in V/E or expanded states.
+
+---
+
+<a id="section-python-vs-java-for-interviews"></a>
 
 # Python vs Java for Interviews
 

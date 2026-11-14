@@ -1,8 +1,415 @@
 # Complete DSA Patterns: Multiple Problems Per Pattern (C)
 
+<a id="quick-navigation"></a>
+
+## Quick navigation
+
+- [0. C LANGUAGE & DATA STRUCTURE CHEAT SHEET](#section-0-c-language-and-data-structure-cheat-sheet)
+- [1. ARRAYS & HASHING](#section-1-arrays-and-hashing)
+- [2. TWO POINTERS](#section-2-two-pointers)
+- [3. SLIDING WINDOW](#section-3-sliding-window)
+- [4. BINARY SEARCH](#section-4-binary-search)
+- [5. STACKS](#section-5-stacks)
+- [6. QUEUES](#section-6-queues)
+- [7. LINKED LISTS](#section-7-linked-lists)
+- [8. TREES - DFS](#section-8-trees-dfs)
+- [9. TREES - BFS](#section-9-trees-bfs)
+- [10. GRAPHS - DFS](#section-10-graphs-dfs)
+- [11. GRAPHS - BFS (SHORTEST PATH)](#section-11-graphs-bfs-shortest-path)
+- [12. TOPOLOGICAL SORT](#section-12-topological-sort)
+- [13. HEAPS / PRIORITY QUEUE](#section-13-heaps-priority-queue)
+- [14. BACKTRACKING](#section-14-backtracking)
+- [15. ADVANCED GRAPH PATTERNS](#section-15-advanced-graph-patterns)
+- [Quick Reference: Pattern Selection](#section-quick-reference-pattern-selection)
+- [C Syntax Cheat Sheet](#section-c-syntax-cheat-sheet)
+
+
 **Note:** C does not have built-in data structures like hash maps, dynamic arrays, or queues. This guide uses arrays and structs with manual memory management. For production code, consider implementing or using libraries for these data structures.
 
+<a id="section-0-c-language-and-data-structure-cheat-sheet"></a>
+
+# 0. C LANGUAGE & DATA STRUCTURE CHEAT SHEET
+
+C has no standard dynamic array, hash map, set, queue, or heap. In interviews, either implement the small operations you need or state the representation and use a compact helper.
+
+## Headers, functions, and basic syntax
+
+```c
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+
+long long solve(const int *nums, int numsSize) {
+    long long answer = 0;
+    return answer;
+}
+
+int temporary = left;          /* swap */
+left = right;
+right = temporary;
+
+const long long INF = LLONG_MAX / 4;
+```
+
+Pass array length separately. Use `const` on pointers when the function must not mutate the data.
+
+## Loops
+
+```c
+for (int index = 0; index < numsSize; index++) {
+    int value = nums[index];
+}
+
+for (int index = numsSize - 1; index >= 0; index--) {
+    int value = nums[index];
+}
+
+int index = 0;
+while (index < numsSize) {
+    index++;
+}
+
+do {
+    /* runs at least once */
+} while (condition);
+
+for (int row = 0; row < rows; row++) {
+    for (int col = 0; col < cols; col++) {
+    }
+}
+/* break exits one loop; continue skips to its next iteration. */
+```
+
+## Fixed arrays and matrices
+
+```c
+int nums[] = {3, 1, 2};
+int length = (int)(sizeof(nums) / sizeof(nums[0])); /* only in same scope */
+int zeros[100] = {0};
+
+int value = nums[index];
+nums[index] = 99;
+
+int matrix[ROWS][COLS] = {{0}};
+int cell = matrix[row][col];
+
+memset(zeros, 0, sizeof(zeros));            /* byte value 0 is safe */
+memcpy(destination, source, count * sizeof(int));
+```
+
+Once passed to a function, an array becomes a pointer and `sizeof(pointer)` is not its element count. Always pass the length. Do not use `memset(array, 1, ...)` to make integer ones—it fills bytes.
+
+## Dynamic array: create, add, remove, check
+
+```c
+typedef struct {
+    int *data;
+    int size;
+    int capacity;
+} IntVector;
+
+bool vectorInit(IntVector *vector, int initialCapacity) {
+    vector->size = 0;
+    vector->capacity = initialCapacity > 0 ? initialCapacity : 4;
+    vector->data = malloc((size_t)vector->capacity * sizeof(int));
+    return vector->data != NULL;
+}
+
+bool vectorPush(IntVector *vector, int value) {
+    if (vector->size == vector->capacity) {
+        int newCapacity = vector->capacity * 2;
+        int *newData = realloc(
+            vector->data, (size_t)newCapacity * sizeof(int)
+        );
+        if (newData == NULL) return false;  /* original pointer is still valid */
+        vector->data = newData;
+        vector->capacity = newCapacity;
+    }
+    vector->data[vector->size++] = value;
+    return true;
+}
+
+int vectorPop(IntVector *vector) {
+    return vector->data[--vector->size];    /* caller must check size > 0 */
+}
+
+int vectorRemoveAt(IntVector *vector, int index) {
+    int removed = vector->data[index];
+    memmove(
+        &vector->data[index],
+        &vector->data[index + 1],
+        (size_t)(vector->size - index - 1) * sizeof(int)
+    );
+    vector->size--;
+    return removed;
+}
+
+bool vectorContains(const IntVector *vector, int target) {
+    for (int index = 0; index < vector->size; index++) {
+        if (vector->data[index] == target) return true;
+    }
+    return false;
+}
+
+void vectorDestroy(IntVector *vector) {
+    free(vector->data);
+    vector->data = NULL;
+    vector->size = vector->capacity = 0;
+}
+```
+
+Append is O(1) amortised; removal from the middle and membership are O(n). A vector also works as a stack: push with `vectorPush`, peek at `data[size - 1]`, and pop with `vectorPop`.
+
+## Strings / character arrays
+
+```c
+char text[] = "graph";                    /* mutable array */
+const char *literal = "graph";            /* do not mutate string literal */
+
+size_t length = strlen(text);             /* excludes '\0' */
+char character = text[index];
+text[index] = 'G';
+
+bool same = strcmp(first, second) == 0;
+int ordering = strcmp(first, second);
+char *position = strchr(text, 'a');        /* NULL if absent */
+char *substring = strstr(text, "rap");      /* NULL if absent */
+
+char buffer[100];
+snprintf(buffer, sizeof(buffer), "%s-%d", text, value);
+
+char copy[100];
+strncpy(copy, text, sizeof(copy) - 1);
+copy[sizeof(copy) - 1] = '\0';
+
+long number = strtol("42", NULL, 10);
+```
+
+A C string must end with `'\0'`. Track buffer capacity and leave room for the terminator; avoid unsafe `strcpy` and `sprintf` when input size is unknown.
+
+## Structs, pointers, and linked lists
+
+```c
+typedef struct ListNode {
+    int value;
+    struct ListNode *next;
+} ListNode;
+
+ListNode *pushFront(ListNode *head, int value) {
+    ListNode *node = malloc(sizeof(ListNode));
+    if (node == NULL) return head;
+    node->value = value;
+    node->next = head;
+    return node;
+}
+
+bool listContains(const ListNode *head, int target) {
+    for (const ListNode *node = head; node != NULL; node = node->next) {
+        if (node->value == target) return true;
+    }
+    return false;
+}
+
+ListNode *removeFirst(ListNode *head, int target) {
+    ListNode dummy = {0, head};
+    ListNode *previous = &dummy;
+    while (previous->next != NULL && previous->next->value != target) {
+        previous = previous->next;
+    }
+    if (previous->next != NULL) {
+        ListNode *removed = previous->next;
+        previous->next = removed->next;
+        free(removed);
+    }
+    return dummy.next;
+}
+
+void freeList(ListNode *head) {
+    while (head != NULL) {
+        ListNode *next = head->next;
+        free(head);
+        head = next;
+    }
+}
+```
+
+Use `pointer->field` for a struct pointer and `value.field` for a struct value.
+
+## Queue / circular buffer
+
+```c
+typedef struct {
+    int *data;
+    int capacity;
+    int front;
+    int size;
+} IntQueue;
+
+bool queueInit(IntQueue *queue, int capacity) {
+    queue->data = malloc((size_t)capacity * sizeof(int));
+    queue->capacity = capacity;
+    queue->front = 0;
+    queue->size = 0;
+    return queue->data != NULL;
+}
+
+bool queueOffer(IntQueue *queue, int value) {
+    if (queue->size == queue->capacity) return false;
+    int back = (queue->front + queue->size) % queue->capacity;
+    queue->data[back] = value;
+    queue->size++;
+    return true;
+}
+
+int queuePeek(const IntQueue *queue) {
+    return queue->data[queue->front];      /* caller checks size > 0 */
+}
+
+int queuePoll(IntQueue *queue) {
+    int value = queue->data[queue->front];
+    queue->front = (queue->front + 1) % queue->capacity;
+    queue->size--;
+    return value;
+}
+
+/* free(queue.data) when finished */
+```
+
+For BFS, capacity V is enough if each vertex is marked visited **before** enqueueing and therefore enters once.
+
+## Min-heap / priority queue
+
+```c
+void minHeapPush(int *heap, int *size, int value) {
+    int index = (*size)++;
+    while (index > 0) {
+        int parent = (index - 1) / 2;
+        if (heap[parent] <= value) break;
+        heap[index] = heap[parent];
+        index = parent;
+    }
+    heap[index] = value;
+}
+
+int minHeapPop(int *heap, int *size) {
+    int answer = heap[0];
+    int last = heap[--(*size)];
+    int index = 0;
+
+    while (index * 2 + 1 < *size) {
+        int child = index * 2 + 1;
+        if (child + 1 < *size && heap[child + 1] < heap[child]) child++;
+        if (heap[child] >= last) break;
+        heap[index] = heap[child];
+        index = child;
+    }
+    if (*size > 0) heap[index] = last;
+    return answer;
+}
+
+/* peek: heap[0]; empty: size == 0; allocate capacity before pushing */
+```
+
+Push/pop is O(log n), peek is O(1). For Dijkstra, heap entries should be structs containing distance and node, compared by distance.
+
+## Sorting and searching
+
+```c
+static int compareInts(const void *left, const void *right) {
+    int a = *(const int *)left;
+    int b = *(const int *)right;
+    return (a > b) - (a < b);             /* avoids subtraction overflow */
+}
+
+qsort(nums, (size_t)numsSize, sizeof(int), compareInts);
+
+int key = target;
+int *found = bsearch(
+    &key, nums, (size_t)numsSize, sizeof(int), compareInts
+);
+bool exists = found != NULL;
+```
+
+`bsearch` requires sorted input. Your comparator must return negative, zero, or positive.
+
+## Sets and maps in C
+
+The standard library has no hash set/map. Pick the simplest representation allowed by the constraints:
+
+```c
+/* Direct-address set for values in [0, MAX_VALUE]. */
+bool *present = calloc((size_t)MAX_VALUE + 1, sizeof(bool));
+present[value] = true;          /* add */
+bool exists = present[value];   /* check */
+present[value] = false;         /* remove */
+free(present);
+
+/* Frequency map for lowercase letters. */
+int frequency[26] = {0};
+frequency[character - 'a']++;
+```
+
+For arbitrary keys, use a small custom hash table (buckets plus chaining/open addressing), sort then binary-search, or coordinate-compress. In an interview, explain the choice and collision strategy instead of pretending C has a built-in map.
+
+## Graph representations
+
+```c
+typedef struct AdjNode {
+    int to;
+    int weight;
+    struct AdjNode *next;
+} AdjNode;
+
+bool addDirectedEdge(AdjNode **graph, int from, int to, int weight) {
+    AdjNode *edge = malloc(sizeof(AdjNode));
+    if (edge == NULL) return false;
+    edge->to = to;
+    edge->weight = weight;
+    edge->next = graph[from];
+    graph[from] = edge;
+    return true;
+}
+
+AdjNode **graph = calloc((size_t)vertexCount, sizeof(AdjNode *));
+addDirectedEdge(graph, source, target, weight);
+/* For undirected: also addDirectedEdge(graph, target, source, weight). */
+
+bool *visited = calloc((size_t)vertexCount, sizeof(bool));
+int directions4[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+```
+
+Free every adjacency node, then `graph` and `visited`, when finished.
+
+## Memory and interview traps
+
+- `malloc(count * sizeof(*pointer))` allocates uninitialised memory; `calloc` zero-initialises it.
+- Check allocation and `realloc` results. Assign `realloc` to a temporary pointer first.
+- Every successful allocation needs exactly one `free`; never use memory after freeing it.
+- Use `long long` for sums, products, and distances; guard infinity before addition.
+- C passes arguments by value. Pass a pointer when a function must mutate the caller's value.
+- Bounds are never checked. Validate indices before array access.
+- Recursive DFS may overflow the call stack on a long chain; use an explicit stack for large inputs.
+
+## Complexity reminders
+
+| Representation | Add | Remove | Membership / lookup |
+| -------------- | --- | ------ | ------------------- |
+| fixed array end with size | O(1) | O(1) | O(n), index O(1) |
+| dynamic vector end | O(1)* | O(1) | O(n), index O(1) |
+| linked-list front | O(1) | O(n) by value | O(n) |
+| direct-address set | O(1) | O(1) | O(1) |
+| sorted array | O(n) | O(n) | O(log n) |
+| binary heap | O(log n) | O(log n) | peek O(1) |
+| adjacency list traversal | — | — | O(V + E) |
+
+*Amortised.
+
 ---
+
+<a id="section-1-arrays-and-hashing"></a>
 
 # 1. ARRAYS & HASHING
 
@@ -320,6 +727,8 @@ int subarraySum(int* nums, int numsSize, int k) {
 
 ---
 
+<a id="section-2-two-pointers"></a>
+
 # 2. TWO POINTERS
 
 ---
@@ -471,6 +880,8 @@ void moveZeroes(int* nums, int numsSize) {
 **Intuition:** Swap non-zero elements to the front. Zeroes naturally end up at the back.
 
 ---
+
+<a id="section-3-sliding-window"></a>
 
 # 3. SLIDING WINDOW
 
@@ -645,6 +1056,8 @@ char* minWindow(char* s, char* t) {
 **Intuition:** Expand until valid. Then shrink while still valid, tracking minimum.
 
 ---
+
+<a id="section-4-binary-search"></a>
 
 # 4. BINARY SEARCH
 
@@ -825,6 +1238,8 @@ int minEatingSpeed(int* piles, int pilesSize, int h) {
 
 ---
 
+<a id="section-5-stacks"></a>
+
 # 5. STACKS
 
 ---
@@ -1000,6 +1415,8 @@ void minStackFree(MinStack* obj) {
 
 ---
 
+<a id="section-6-queues"></a>
+
 # 6. QUEUES
 
 ---
@@ -1122,6 +1539,8 @@ int* maxSlidingWindow(int* nums, int numsSize, int k, int* returnSize) {
 
 ---
 
+<a id="section-7-linked-lists"></a>
+
 # 7. LINKED LISTS
 
 ---
@@ -1242,6 +1661,8 @@ struct ListNode* mergeTwoLists(struct ListNode* list1, struct ListNode* list2) {
 
 ---
 
+<a id="section-8-trees-dfs"></a>
+
 # 8. TREES - DFS
 
 ---
@@ -1330,6 +1751,8 @@ int** pathSum(struct TreeNode* root, int targetSum, int* returnSize, int** retur
 
 ---
 
+<a id="section-9-trees-bfs"></a>
+
 # 9. TREES - BFS
 
 ---
@@ -1407,6 +1830,8 @@ int* rightSideView(struct TreeNode* root, int* returnSize) {
 
 ---
 
+<a id="section-10-graphs-dfs"></a>
+
 # 10. GRAPHS - DFS
 
 ---
@@ -1448,6 +1873,8 @@ int numIslands(char** grid, int gridSize, int* gridColSize) {
 ```
 
 ---
+
+<a id="section-11-graphs-bfs-shortest-path"></a>
 
 # 11. GRAPHS - BFS (SHORTEST PATH)
 
@@ -1508,6 +1935,8 @@ int shortestPathBinaryMatrix(int** grid, int gridSize, int* gridColSize) {
 ```
 
 ---
+
+<a id="section-12-topological-sort"></a>
 
 # 12. TOPOLOGICAL SORT
 
@@ -1625,6 +2054,8 @@ int* findOrder(int numCourses, int** prerequisites, int prerequisitesSize, int* 
 ```
 
 ---
+
+<a id="section-13-heaps-priority-queue"></a>
 
 # 13. HEAPS / PRIORITY QUEUE
 
@@ -1778,6 +2209,8 @@ struct ListNode* mergeKLists(struct ListNode** lists, int listsSize) {
 ```
 
 ---
+
+<a id="section-14-backtracking"></a>
 
 # 14. BACKTRACKING
 
@@ -2003,6 +2436,375 @@ char*** solveNQueens(int n, int* returnSize, int** returnColumnSizes) {
 
 ---
 
+<a id="section-15-advanced-graph-patterns"></a>
+
+# 15. ADVANCED GRAPH PATTERNS
+
+| Signal | Algorithm | Complexity |
+| ------ | --------- | ---------- |
+| Unweighted / many-source shortest path | BFS / multi-source BFS | O(V + E) |
+| Weights only 0 or 1 | 0-1 BFS with a deque | O(V + E) |
+| Non-negative weights | Dijkstra with a min-heap | O((V + E) log V) |
+| Negative edges or an edge limit | Bellman-Ford | O(VE), or O(KE) |
+| All-pairs distances, small V | Floyd-Warshall | O(V^3) |
+| Incremental connectivity | Union-Find | Almost O(1) per operation |
+| Minimum total connection cost | Kruskal / Prim MST | O(E log E) / O(E log V) |
+| Critical edges | Tarjan low-link | O(V + E) |
+| Node plus keys/stops/resources | Search the expanded state graph | Depends on state count |
+
+In C, choose the representation deliberately:
+
+- **Edge list (`Edge edges[E]`)**: Bellman-Ford and Kruskal.
+- **Adjacency list (`AdjNode *graph[V]`)**: DFS, BFS, Dijkstra, bridges.
+- **Matrix (`dist[V][V]`)**: Floyd-Warshall only when V is small.
+- Free every allocated adjacency node in production code; interview platforms often reclaim process memory, but mention ownership.
+
+---
+
+## Pattern 15A: Dijkstra - Non-Negative Weighted Shortest Path
+
+```c
+#include <limits.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+typedef struct AdjNode {
+    int to;
+    int weight;
+    int edgeId;
+    struct AdjNode *next;
+} AdjNode;
+
+typedef struct {
+    long long distance;
+    int node;
+} HeapNode;
+
+typedef struct {
+    HeapNode *items;
+    int size;
+    int capacity;
+} MinHeap;
+
+static void heapPush(MinHeap *heap, HeapNode value) {
+    if (heap->size == heap->capacity) {
+        heap->capacity = heap->capacity == 0 ? 16 : heap->capacity * 2;
+        heap->items = realloc(heap->items, heap->capacity * sizeof(HeapNode));
+    }
+    int index = heap->size++;
+    while (index > 0) {
+        int parent = (index - 1) / 2;
+        if (heap->items[parent].distance <= value.distance) break;
+        heap->items[index] = heap->items[parent];
+        index = parent;
+    }
+    heap->items[index] = value;
+}
+
+static HeapNode heapPop(MinHeap *heap) {
+    HeapNode answer = heap->items[0];
+    HeapNode last = heap->items[--heap->size];
+    int index = 0;
+    while (index * 2 + 1 < heap->size) {
+        int child = index * 2 + 1;
+        if (child + 1 < heap->size &&
+            heap->items[child + 1].distance < heap->items[child].distance) {
+            child++;
+        }
+        if (heap->items[child].distance >= last.distance) break;
+        heap->items[index] = heap->items[child];
+        index = child;
+    }
+    if (heap->size > 0) heap->items[index] = last;
+    return answer;
+}
+
+void dijkstra(int vertexCount, AdjNode **graph, int source, long long *distance) {
+    const long long INF = LLONG_MAX / 4;
+    for (int node = 0; node < vertexCount; node++) distance[node] = INF;
+    distance[source] = 0;
+
+    MinHeap heap = {NULL, 0, 0};
+    heapPush(&heap, (HeapNode){0, source});
+
+    while (heap.size > 0) {
+        HeapNode current = heapPop(&heap);
+        if (current.distance != distance[current.node]) continue; /* stale */
+
+        for (AdjNode *edge = graph[current.node]; edge; edge = edge->next) {
+            long long candidate = current.distance + edge->weight;
+            if (candidate < distance[edge->to]) {
+                distance[edge->to] = candidate;
+                heapPush(&heap, (HeapNode){candidate, edge->to});
+            }
+        }
+    }
+    free(heap.items);
+}
+```
+
+**Invariant:** with non-negative weights, the current best heap removal is final. Push improved duplicates and discard stale entries; a decrease-key operation is unnecessary.
+
+---
+
+## Pattern 15B: Bellman-Ford - Negative Edges and Bounded Edges
+
+```c
+typedef struct {
+    int from;
+    int to;
+    int weight;
+} WeightedEdge;
+
+/* Returns false when a reachable negative cycle exists. */
+bool bellmanFord(
+    int vertexCount,
+    const WeightedEdge *edges,
+    int edgeCount,
+    int source,
+    long long *distance
+) {
+    const long long INF = LLONG_MAX / 4;
+    for (int node = 0; node < vertexCount; node++) distance[node] = INF;
+    distance[source] = 0;
+
+    for (int pass = 1; pass < vertexCount; pass++) {
+        bool changed = false;
+        for (int i = 0; i < edgeCount; i++) {
+            WeightedEdge edge = edges[i];
+            if (distance[edge.from] != INF &&
+                distance[edge.from] + edge.weight < distance[edge.to]) {
+                distance[edge.to] = distance[edge.from] + edge.weight;
+                changed = true;
+            }
+        }
+        if (!changed) break;
+    }
+
+    for (int i = 0; i < edgeCount; i++) {
+        WeightedEdge edge = edges[i];
+        if (distance[edge.from] != INF &&
+            distance[edge.from] + edge.weight < distance[edge.to]) {
+            return false;
+        }
+    }
+    return true;
+}
+```
+
+For "at most K edges", perform K passes while reading from an old distance array and writing to a copied next array. In-place updates can accidentally chain more than one edge per pass.
+
+---
+
+## Pattern 15C: Floyd-Warshall - All-Pairs Shortest Paths
+
+```c
+void floydWarshall(int vertexCount, long long **distance) {
+    const long long INF = LLONG_MAX / 4;
+    for (int middle = 0; middle < vertexCount; middle++) {
+        for (int from = 0; from < vertexCount; from++) {
+            if (distance[from][middle] == INF) continue;
+            for (int to = 0; to < vertexCount; to++) {
+                if (distance[middle][to] == INF) continue;
+                long long throughMiddle =
+                    distance[from][middle] + distance[middle][to];
+                if (throughMiddle < distance[from][to]) {
+                    distance[from][to] = throughMiddle;
+                }
+            }
+        }
+    }
+}
+```
+
+Initialise `distance[i][i] = 0`, direct edges to their minimum weight, and everything else to `INF`. Afterward, `distance[i][i] < 0` identifies a reachable negative cycle involving `i`.
+
+---
+
+## Pattern 15D: Union-Find and Kruskal MST
+
+```c
+typedef struct {
+    int *parent;
+    int *size;
+} UnionFind;
+
+static int findRoot(UnionFind *uf, int node) {
+    if (uf->parent[node] != node) {
+        uf->parent[node] = findRoot(uf, uf->parent[node]);
+    }
+    return uf->parent[node];
+}
+
+static bool unionSets(UnionFind *uf, int first, int second) {
+    int rootFirst = findRoot(uf, first);
+    int rootSecond = findRoot(uf, second);
+    if (rootFirst == rootSecond) return false;
+    if (uf->size[rootFirst] < uf->size[rootSecond]) {
+        int temporary = rootFirst;
+        rootFirst = rootSecond;
+        rootSecond = temporary;
+    }
+    uf->parent[rootSecond] = rootFirst;
+    uf->size[rootFirst] += uf->size[rootSecond];
+    return true;
+}
+
+static int compareEdges(const void *left, const void *right) {
+    const WeightedEdge *a = left;
+    const WeightedEdge *b = right;
+    return (a->weight > b->weight) - (a->weight < b->weight);
+}
+
+/* Returns -1 if the graph is disconnected. Sorting mutates edges. */
+long long kruskalMst(int vertexCount, WeightedEdge *edges, int edgeCount) {
+    qsort(edges, edgeCount, sizeof(WeightedEdge), compareEdges);
+    UnionFind uf = {
+        malloc(vertexCount * sizeof(int)),
+        malloc(vertexCount * sizeof(int))
+    };
+    for (int node = 0; node < vertexCount; node++) {
+        uf.parent[node] = node;
+        uf.size[node] = 1;
+    }
+
+    long long totalCost = 0;
+    int used = 0;
+    for (int i = 0; i < edgeCount && used < vertexCount - 1; i++) {
+        if (unionSets(&uf, edges[i].from, edges[i].to)) {
+            totalCost += edges[i].weight;
+            used++;
+        }
+    }
+    free(uf.parent);
+    free(uf.size);
+    return used == vertexCount - 1 ? totalCost : -1;
+}
+```
+
+**Keywords:** "merge groups" / "redundant edge" means DSU; "minimum total cost to connect all" means MST. An MST is not a shortest-path tree.
+
+---
+
+## Pattern 15E: Bipartite Graph - Two-Colouring
+
+```c
+bool isBipartite(int vertexCount, AdjNode **graph) {
+    int *colour = malloc(vertexCount * sizeof(int));
+    int *queue = malloc(vertexCount * sizeof(int));
+    for (int node = 0; node < vertexCount; node++) colour[node] = -1;
+
+    for (int start = 0; start < vertexCount; start++) {
+        if (colour[start] != -1) continue;
+        int front = 0, back = 0;
+        queue[back++] = start;
+        colour[start] = 0;
+
+        while (front < back) {
+            int node = queue[front++];
+            for (AdjNode *edge = graph[node]; edge; edge = edge->next) {
+                int neighbour = edge->to;
+                if (colour[neighbour] == -1) {
+                    colour[neighbour] = colour[node] ^ 1;
+                    queue[back++] = neighbour;
+                } else if (colour[neighbour] == colour[node]) {
+                    free(colour);
+                    free(queue);
+                    return false;
+                }
+            }
+        }
+    }
+    free(colour);
+    free(queue);
+    return true;
+}
+```
+
+Every undirected edge must cross colours. A conflict is an odd cycle. The outer loop is required for disconnected graphs.
+
+---
+
+## Pattern 15F: Tarjan Low-Link - Bridges
+
+```c
+typedef struct {
+    AdjNode **graph;
+    int *discovery;
+    int *low;
+    int timer;
+    int (*bridges)[2];
+    int bridgeCount;
+} BridgeContext;
+
+static void bridgeDfs(BridgeContext *context, int node, int parentEdge) {
+    context->discovery[node] = context->low[node] = context->timer++;
+
+    for (AdjNode *edge = context->graph[node]; edge; edge = edge->next) {
+        if (edge->edgeId == parentEdge) continue;
+        int neighbour = edge->to;
+
+        if (context->discovery[neighbour] == -1) {
+            bridgeDfs(context, neighbour, edge->edgeId);
+            if (context->low[neighbour] < context->low[node]) {
+                context->low[node] = context->low[neighbour];
+            }
+            if (context->low[neighbour] > context->discovery[node]) {
+                context->bridges[context->bridgeCount][0] = node;
+                context->bridges[context->bridgeCount][1] = neighbour;
+                context->bridgeCount++;
+            }
+        } else if (context->discovery[neighbour] < context->low[node]) {
+            context->low[node] = context->discovery[neighbour];
+        }
+    }
+}
+```
+
+Allocate `bridges` for at most E pairs and run DFS from every undiscovered node. `low[v] > discovery[u]` means edge `u-v` has no alternate route. Track the parent **edge ID**, not just the parent node, to handle parallel edges.
+
+---
+
+## Pattern 15G: State-Space Graphs and Bitmasks
+
+For keys/locks, coupons, remaining stops, parity, or obstacle eliminations, the state is not just a node:
+
+```c
+typedef struct {
+    int node;
+    unsigned int mask;
+    int steps;
+} SearchState;
+
+/* With K boolean resources, visited has vertexCount * (1U << K) entries. */
+size_t stateIndex(int node, unsigned int mask, unsigned int maskCount) {
+    return (size_t)node * maskCount + mask;
+}
+```
+
+Enqueue `(nextNode, nextMask)` only if that full state has not been visited. Reaching the same node with a different mask can unlock different future transitions. With V positions and K keys, the worst-case state count is O(V * 2^K).
+
+For "use every edge exactly once", use **Hierholzer's algorithm**: consume an unused edge while possible; when stuck, append the vertex to the route; reverse the completed route. Do not confuse Eulerian (every edge) with Hamiltonian (every vertex).
+
+---
+
+## Advanced Graph Interview Checklist
+
+1. Define the real vertex and edge, including hidden state.
+2. State directed/undirected, weighted/unweighted, and whether negative edges exist.
+3. Match weights to BFS, 0-1 BFS, Dijkstra, Bellman-Ford, or DAG relaxation.
+4. Check every component where required.
+5. Use `long long` for accumulated distances and guard infinity before addition.
+6. Distinguish MST total cost from single-source shortest paths.
+7. Discuss allocation ownership, capacity bounds, and recursion depth in C.
+8. Give complexity in V and E—or the expanded state count.
+
+**Next drills:** Network Delay Time, Cheapest Flights Within K Stops, Redundant Connection, Min Cost to Connect All Points, Is Graph Bipartite, Critical Connections, Reconstruct Itinerary, and Shortest Path to Get All Keys.
+
+---
+
+<a id="section-quick-reference-pattern-selection"></a>
+
 # Quick Reference: Pattern Selection
 
 | Keywords                        | Pattern                              |
@@ -2029,10 +2831,19 @@ char*** solveNQueens(int n, int* returnSize, int** returnColumnSizes) {
 | "islands/connected"             | DFS flood fill                       |
 | "shortest path unweighted"      | BFS                                  |
 | "prerequisites/dependencies"    | Topological sort                     |
+| "weighted shortest path"        | Dijkstra                             |
+| "weights are only 0/1"          | 0-1 BFS                              |
+| "negative edges/at most k edges"| Bellman-Ford                         |
+| "merge groups/redundant edge"   | Union-Find                           |
+| "minimum total connection cost" | Minimum spanning tree                |
+| "critical connection"           | Tarjan low-link                      |
+| "node plus keys/stops/resources"| State-space graph                    |
 | "kth largest/merge k sorted"    | Heap                                 |
 | "all combinations/permutations" | Backtracking                         |
 
 ---
+
+<a id="section-c-syntax-cheat-sheet"></a>
 
 # C Syntax Cheat Sheet
 
