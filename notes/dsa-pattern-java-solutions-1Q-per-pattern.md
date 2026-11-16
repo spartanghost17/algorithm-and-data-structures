@@ -345,6 +345,38 @@ long safeInfinity = Long.MAX_VALUE / 4; // leaves room for addition
 
 ## 1. Arrays & Hashing
 
+### General pattern: Arrays and hashing
+
+**Recognise it:** fast existence checks, counts, complements, grouping, or facts about the processed prefix.
+
+```java
+Map<Integer, Integer> scanWithHashing(int[] values) {
+    Set<Integer> seen = new HashSet<>();
+    Map<Integer, Integer> frequency = new HashMap<>();
+
+    for (int value : values) {
+        if (seen.contains(value)) {
+            // use information from an earlier occurrence
+        }
+        seen.add(value);
+        frequency.merge(value, 1, Integer::sum);
+    }
+    return frequency;
+}
+```
+
+**Invariant:** after index `i`, the table describes exactly the processed prefix. Average O(n) time and O(n) space.
+
+**Frequent variations:**
+
+- Complement lookup with `target - value`.
+- Frequency maps with `merge` or `getOrDefault`.
+- Grouping with `computeIfAbsent(key, ...)`.
+- Prefix sum + map for subarray counts.
+- HashSet membership for duplicates, sequences, and visited states.
+
+---
+
 ### Problem: Two Sum
 
 **Statement:** Given an array of integers `nums` and an integer `target`, return the indices of the two numbers such that they add up to target. You may assume each input has exactly one solution.
@@ -400,6 +432,40 @@ The brute force is O(n²): check every pair. But notice: if we need `a + b = tar
 <a id="section-2-two-pointers"></a>
 
 ## 2. Two Pointers
+
+### General pattern: Two pointers
+
+**Recognise it:** pairs, sorted order, opposite ends, or in-place compaction.
+
+```java
+void oppositeEnds(int[] values) {
+    int left = 0, right = values.length - 1;
+    while (left < right) {
+        if (shouldMoveLeft(values[left], values[right])) left++;
+        else right--;
+    }
+}
+
+int compact(int[] values) {
+    int write = 0;
+    for (int read = 0; read < values.length; read++) {
+        if (shouldKeep(values[read])) values[write++] = values[read];
+    }
+    return write;
+}
+```
+
+**Invariant:** everything outside the active range is already decided. Usually O(n) time and O(1) space.
+
+**Frequent variations:**
+
+- Opposite ends: sorted pair sum, container area, palindrome.
+- Read/write: deduplicate, move zeroes, filter in place.
+- Fast/slow speeds: cycle detection and middle node.
+- Sort + two pointers: 3Sum and k-sum.
+- Fixed gap: kth node from the end.
+
+---
 
 ### Problem: Container With Most Water
 
@@ -459,6 +525,39 @@ Start with the widest container (pointers at both ends). The only way to potenti
 <a id="section-3-sliding-window"></a>
 
 ## 3. Sliding Window
+
+### General pattern: Sliding window
+
+**Recognise it:** a contiguous subarray/substring whose state can be updated when either endpoint moves.
+
+```java
+int longestValidWindow(int[] values) {
+    int left = 0, answer = 0;
+    Map<Integer, Integer> state = new HashMap<>();
+
+    for (int right = 0; right < values.length; right++) {
+        add(state, values[right]);
+
+        while (!isValid(state)) {
+            remove(state, values[left++]);
+        }
+        answer = Math.max(answer, right - left + 1);
+    }
+    return answer;
+}
+```
+
+**Invariant:** after shrinking, `[left, right]` is valid. Each endpoint advances at most n times, so the scan is O(n).
+
+**Frequent variations:**
+
+- Fixed-size add/remove window.
+- Longest valid: shrink while invalid.
+- Shortest satisfying: shrink while valid and record the minimum.
+- Exactly K via `atMost(k) - atMost(k - 1)`.
+- Monotonic deque for window minima/maxima.
+
+---
 
 ### Problem: Longest Substring Without Repeating Characters
 
@@ -550,6 +649,35 @@ We want contiguous characters (substring), so sliding window fits. Expand the ri
 
 ## 4. Binary Search
 
+### General pattern: Binary search
+
+**Recognise it:** sorted data or a monotonic feasibility predicate.
+
+```java
+int lowerBound(int[] values, int target) {
+    int left = 0, right = values.length; // half-open [left, right)
+
+    while (left < right) {
+        int middle = left + (right - left) / 2;
+        if (values[middle] < target) left = middle + 1;
+        else right = middle;
+    }
+    return left;
+}
+```
+
+**Invariant:** the answer remains inside the half-open interval. Time O(log n).
+
+**Frequent variations:**
+
+- Exact match.
+- First/last occurrence among duplicates.
+- Rotated array by identifying the sorted half.
+- Binary search on answer with monotonic `feasible(x)`.
+- Flattened matrix or other implicit sorted spaces.
+
+---
+
 ### Problem: Search in Rotated Sorted Array
 
 **Statement:** Given a rotated sorted array `nums` and a `target`, return the index of target or -1 if not found. The array was originally sorted in ascending order, then rotated at some pivot.
@@ -620,6 +748,38 @@ In a rotated sorted array, at least one half (left or right of mid) is always pr
 
 ## 5. Stack
 
+### General pattern: Stack
+
+**Recognise it:** nested structure, matching pairs, undo order, or nearest greater/smaller elements.
+
+```java
+int[] nextGreater(int[] values) {
+    int[] answer = new int[values.length];
+    Arrays.fill(answer, -1);
+    Deque<Integer> stack = new ArrayDeque<>(); // unresolved indices
+
+    for (int index = 0; index < values.length; index++) {
+        while (!stack.isEmpty() && values[stack.peek()] < values[index]) {
+            answer[stack.pop()] = index;
+        }
+        stack.push(index);
+    }
+    return answer;
+}
+```
+
+**Invariant:** unresolved items remain monotonic; each index is pushed and popped once, so the scan is O(n).
+
+**Frequent variations:**
+
+- Matching delimiters.
+- Decreasing stack for next greater; increasing for next smaller.
+- Expression evaluation and calculators.
+- Iterative DFS with explicit frames.
+- Min stack, frequency stack, and undo/history designs.
+
+---
+
 ### Problem: Daily Temperatures
 
 **Statement:** Given an array `temperatures`, return an array `answer` where `answer[i]` is the number of days you have to wait after the i-th day to get a warmer temperature. If no future day is warmer, put 0.
@@ -674,6 +834,43 @@ Each day is "waiting" for a warmer day. Push days onto the stack. When a warmer 
 <a id="section-6-queue-bfs"></a>
 
 ## 6. Queue / BFS
+
+### General pattern: Queue and BFS
+
+**Recognise it:** arrival order, layers, or unweighted shortest paths.
+
+```java
+int[] bfs(List<Integer>[] graph, int start) {
+    int[] distance = new int[graph.length];
+    Arrays.fill(distance, -1);
+    Queue<Integer> queue = new ArrayDeque<>();
+    queue.offer(start);
+    distance[start] = 0;
+
+    while (!queue.isEmpty()) {
+        int node = queue.poll();
+        for (int neighbour : graph[node]) {
+            if (distance[neighbour] == -1) {
+                distance[neighbour] = distance[node] + 1;
+                queue.offer(neighbour);
+            }
+        }
+    }
+    return distance;
+}
+```
+
+**Invariant:** mark on enqueue; first discovery is the shortest equal-edge distance. Complexity O(V + E).
+
+**Frequent variations:**
+
+- Level order using a saved `queue.size()`.
+- Multi-source BFS with all sources initially queued.
+- State-space BFS with `int[]`/record states.
+- Bidirectional BFS from both endpoints.
+- Monotonic `Deque` for sliding-window extrema.
+
+---
 
 ### Problem: Rotting Oranges
 
@@ -770,6 +967,37 @@ This is a multi-source BFS. All rotten oranges start spreading simultaneously—
 
 ## 7. Linked List
 
+### General pattern: Linked-list pointer rewiring
+
+**Recognise it:** reverse, splice, merge, or inspect sequential nodes.
+
+```java
+ListNode reverseList(ListNode head) {
+    ListNode previous = null;
+    ListNode current = head;
+
+    while (current != null) {
+        ListNode following = current.next;
+        current.next = previous;
+        previous = current;
+        current = following;
+    }
+    return previous;
+}
+```
+
+**Invariant:** `previous` is the reversed prefix; `current` begins the untouched suffix. O(n) time, O(1) space.
+
+**Frequent variations:**
+
+- Dummy node for head deletion/insertion and merging.
+- Fast/slow pointers for middle, cycle, palindrome.
+- Pointer gap for kth from end.
+- Whole/sublist/k-group reversal.
+- Sorted merge and pointer-identity intersection.
+
+---
+
 ### Problem: Reverse Linked List
 
 **Statement:** Given the head of a singly linked list, reverse the list and return the new head.
@@ -848,6 +1076,32 @@ public class ReverseLinkedListRecursive {
 
 ## 8. Trees - DFS
 
+### General pattern: Tree DFS
+
+**Recognise it:** subtree results, root-to-leaf paths, ancestors, or recursive structure.
+
+```java
+int dfs(TreeNode node) {
+    if (node == null) return BASE_VALUE;
+
+    int leftResult = dfs(node.left);
+    int rightResult = dfs(node.right);
+    return combine(node, leftResult, rightResult);
+}
+```
+
+**Invariant:** define precisely what one call returns for its subtree. Usually O(n) time and O(h) stack space.
+
+**Frequent variations:**
+
+- Preorder for copying/serialisation.
+- Inorder for BST sorted order.
+- Postorder for height, balance, diameter, and aggregation.
+- Carry path sum, bounds, or choices downward.
+- Return one value while updating a global best.
+
+---
+
 ### Problem: Lowest Common Ancestor of Binary Tree
 
 **Statement:** Given a binary tree and two nodes `p` and `q`, find their lowest common ancestor (LCA). The LCA is the deepest node that has both p and q as descendants (a node can be a descendant of itself).
@@ -906,6 +1160,45 @@ DFS down the tree. If we find p or q, return it upward. If a node receives non-n
 <a id="section-9-trees-bfs"></a>
 
 ## 9. Trees - BFS
+
+### General pattern: Tree BFS
+
+**Recognise it:** levels, minimum depth, nearest nodes, or side views.
+
+```java
+List<List<Integer>> levelOrder(TreeNode root) {
+    List<List<Integer>> levels = new ArrayList<>();
+    if (root == null) return levels;
+
+    Queue<TreeNode> queue = new ArrayDeque<>();
+    queue.offer(root);
+
+    while (!queue.isEmpty()) {
+        int levelSize = queue.size();
+        List<Integer> level = new ArrayList<>();
+        while (levelSize-- > 0) {
+            TreeNode node = queue.poll();
+            level.add(node.val);
+            if (node.left != null) queue.offer(node.left);
+            if (node.right != null) queue.offer(node.right);
+        }
+        levels.add(level);
+    }
+    return levels;
+}
+```
+
+**Invariant:** each saved queue size represents one complete depth. O(n) time and O(maximum width) space.
+
+**Frequent variations:**
+
+- Full level order.
+- Left/right view using first/last in a level.
+- Zigzag levels.
+- Minimum depth by returning at the first leaf.
+- Connect same-level next pointers.
+
+---
 
 ### Problem: Binary Tree Level Order Traversal
 
@@ -966,6 +1259,48 @@ BFS naturally visits nodes level by level. The key trick: before processing a le
 <a id="section-10-graphs-dfs"></a>
 
 ## 10. Graphs - DFS
+
+### General pattern: Graph DFS and components
+
+**Recognise it:** reachability, regions, components, cycles, or exhaustive exploration.
+
+```java
+int countComponents(List<Integer>[] graph) {
+    boolean[] visited = new boolean[graph.length];
+    int components = 0;
+
+    for (int start = 0; start < graph.length; start++) {
+        if (visited[start]) continue;
+        components++;
+        Deque<Integer> stack = new ArrayDeque<>();
+        stack.push(start);
+        visited[start] = true;
+
+        while (!stack.isEmpty()) {
+            int node = stack.pop();
+            for (int neighbour : graph[node]) {
+                if (!visited[neighbour]) {
+                    visited[neighbour] = true;
+                    stack.push(neighbour);
+                }
+            }
+        }
+    }
+    return components;
+}
+```
+
+**Invariant:** mark before pushing so every vertex is processed once. Complexity O(V + E).
+
+**Frequent variations:**
+
+- Grid flood fill.
+- Component counting.
+- Directed cycle detection with three states.
+- Undirected cycles with parent edge or Union-Find.
+- Clone graphs and enumerate paths.
+
+---
 
 ### Problem: Number of Islands
 
@@ -1042,6 +1377,45 @@ Each '1' we find could be a new island. Start DFS from it to mark all connected 
 <a id="section-11-graphs-bfs-shortest-path"></a>
 
 ## 11. Graphs - BFS (Shortest Path)
+
+### General pattern: Unweighted shortest path
+
+**Recognise it:** minimum steps, moves, transformations, or equal-cost transitions.
+
+```java
+int shortestPath(List<Integer>[] graph, int source, int target) {
+    int[] distance = new int[graph.length];
+    Arrays.fill(distance, -1);
+    Queue<Integer> queue = new ArrayDeque<>();
+    queue.offer(source);
+    distance[source] = 0;
+
+    while (!queue.isEmpty()) {
+        int node = queue.poll();
+        if (node == target) return distance[node];
+
+        for (int neighbour : graph[node]) {
+            if (distance[neighbour] == -1) {
+                distance[neighbour] = distance[node] + 1;
+                queue.offer(neighbour);
+            }
+        }
+    }
+    return -1;
+}
+```
+
+**Invariant:** FIFO layers make first arrival shortest. Complexity O(V + E).
+
+**Frequent variations:**
+
+- Multi-source distances.
+- Generated word/state neighbours.
+- Full state including mask, stops, parity, or resource.
+- Parent array for path reconstruction.
+- Switch to 0-1 BFS/Dijkstra/Bellman-Ford for weighted edges.
+
+---
 
 ### Problem: Shortest Path in Binary Matrix
 
@@ -1122,6 +1496,34 @@ BFS explores all cells at distance K before any cell at distance K+1. So the fir
 
 ## 12. Heap / Priority Queue
 
+### General pattern: Heap / priority queue
+
+**Recognise it:** repeatedly extract the smallest/largest, keep top K, or merge sorted streams.
+
+```java
+PriorityQueue<Integer> keepKLargest(int[] values, int k) {
+    PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+
+    for (int value : values) {
+        minHeap.offer(value);
+        if (minHeap.size() > k) minHeap.poll();
+    }
+    return minHeap;
+}
+```
+
+**Invariant:** the heap contains exactly the best candidates needed so far. Size-k processing is O(n log k).
+
+**Frequent variations:**
+
+- Top K / kth largest.
+- K-way merge storing one item per source.
+- Scheduling/Dijkstra with priority-state entries.
+- Two heaps for streaming median.
+- Greedy repeated combination/selection.
+
+---
+
 ### Problem: Merge K Sorted Lists
 
 **Statement:** Given an array of `k` linked lists, each sorted in ascending order, merge all lists into one sorted linked list.
@@ -1192,6 +1594,38 @@ At any moment, the next smallest element must be the head of one of the K lists.
 
 ## 13. Backtracking
 
+### General pattern: Backtracking
+
+**Recognise it:** enumerate valid choices, arrangements, partitions, or constraint solutions.
+
+```java
+void backtrack(int start, List<Integer> path, List<List<Integer>> answers) {
+    if (isComplete(path)) {
+        answers.add(new ArrayList<>(path));
+        return;
+    }
+
+    for (int choice : candidates(start, path)) {
+        if (!isValid(choice, path)) continue;
+        path.add(choice);
+        backtrack(nextStart(start, choice), path, answers);
+        path.remove(path.size() - 1);
+    }
+}
+```
+
+**Invariant:** `path` contains exactly the current branch. Undo every mutation before the next sibling.
+
+**Frequent variations:**
+
+- Subsets/combinations with advancing start index.
+- Permutations with `used[]` or swaps.
+- Sort and skip duplicates at the same depth.
+- Grid mark/recurse/restore.
+- O(1) constraint sets for rows, columns, diagonals, etc.
+
+---
+
 ### Problem: Combination Sum
 
 **Statement:** Given an array of distinct integers `candidates` and a target integer `target`, return all unique combinations of candidates where the chosen numbers sum to target. The same number may be chosen unlimited times.
@@ -1260,6 +1694,42 @@ Backtracking = controlled brute force. At each step, try adding each candidate. 
 <a id="section-14-graph-topological-sort"></a>
 
 ## 14. Graph - Topological Sort
+
+### General pattern: Topological ordering
+
+**Recognise it:** prerequisites, dependencies, scheduling, build order, or directed cycles.
+
+```java
+int[] topologicalOrder(List<Integer>[] graph, int[] indegree) {
+    Queue<Integer> queue = new ArrayDeque<>();
+    for (int node = 0; node < graph.length; node++) {
+        if (indegree[node] == 0) queue.offer(node);
+    }
+
+    int[] order = new int[graph.length];
+    int size = 0;
+    while (!queue.isEmpty()) {
+        int node = queue.poll();
+        order[size++] = node;
+        for (int neighbour : graph[node]) {
+            if (--indegree[neighbour] == 0) queue.offer(neighbour);
+        }
+    }
+    return size == graph.length ? order : new int[0];
+}
+```
+
+**Invariant:** only nodes whose prerequisites are processed enter the queue. Complexity O(V + E).
+
+**Frequent variations:**
+
+- Cycle/feasibility via processed count.
+- Return one valid order.
+- Lexicographically smallest order with `PriorityQueue`.
+- DFS postorder with visiting-state detection.
+- DAG DP for paths, counts, and completion times.
+
+---
 
 ### Problem: Course Schedule
 
@@ -1344,6 +1814,27 @@ Model as a directed graph: edge from A to B means "A must come before B". Topolo
 <a id="section-graph-mastery-expansion-one-question-per-advanced-pattern"></a>
 
 # Graph Mastery Expansion: One Question Per Advanced Pattern
+
+### General pattern: Model the graph before choosing the algorithm
+
+Define the **vertex**, **edge**, **direction**, **weight rules**, and extra state such as keys, stops, masks, or resources.
+
+| Edge / goal shape | Default pattern |
+| ----------------- | --------------- |
+| Equal-weight shortest path | BFS |
+| Many simultaneous sources | Multi-source BFS |
+| Weights only 0 or 1 | 0-1 BFS |
+| Non-negative weights | Dijkstra |
+| Negative edges / bounded edges | Bellman-Ford |
+| DAG dependency/path | Topological order + DP |
+| Dynamic connectivity | Union-Find |
+| Minimum total connection | MST |
+| Critical edges/components | Low-link DFS / SCC |
+| Use every edge once | Hierholzer |
+
+**Frequent variations:** state-expanded shortest paths, all-pairs paths, bipartite colouring, bridges, SCCs, Eulerian routes, and tree-query preprocessing.
+
+---
 
 ## G1. Dijkstra - Network Delay Time
 

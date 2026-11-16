@@ -355,6 +355,30 @@ int directions4[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
 # 1. ARRAYS & HASHING
 
+## General pattern: Arrays and hashing
+
+**Recognise it:** existence, counts, complements, grouping, or prefix history.
+
+```cpp
+unordered_map<int, int> scanWithHashing(const vector<int>& values) {
+    unordered_set<int> seen;
+    unordered_map<int, int> frequency;
+
+    for (int value : values) {
+        if (seen.find(value) != seen.end()) {
+            // use an earlier occurrence
+        }
+        seen.insert(value);
+        ++frequency[value];
+    }
+    return frequency;
+}
+```
+
+**Invariant:** the hash structures describe exactly the processed prefix. Average O(n) time and O(n) space.
+
+**Frequent variations:** complement lookup, frequency counting, canonical-key grouping, prefix-sum maps, and set membership.
+
 ---
 
 ## Pattern 1A: Complement Lookup (Two Sum Pattern)
@@ -533,6 +557,32 @@ int subarraySum(vector<int>& nums, int k) {
 
 # 2. TWO POINTERS
 
+## General pattern: Two pointers
+
+**Recognise it:** pairs, sorted order, opposite ends, or in-place compaction.
+
+```cpp
+int compact(vector<int>& values) {
+    int write = 0;
+    for (int read = 0; read < static_cast<int>(values.size()); ++read) {
+        if (shouldKeep(values[read])) values[write++] = values[read];
+    }
+    return write;
+}
+
+void oppositeEnds(const vector<int>& values) {
+    int left = 0, right = static_cast<int>(values.size()) - 1;
+    while (left < right) {
+        if (shouldMoveLeft(values[left], values[right])) ++left;
+        else --right;
+    }
+}
+```
+
+**Invariant:** everything outside the active range is decided. Usually O(n) time, O(1) space.
+
+**Frequent variations:** sorted pair sum, read/write filtering, fast/slow cycles, 3Sum, and fixed-gap pointers.
+
 ---
 
 ## Pattern 2A: Opposite Ends (Sorted or Optimization)
@@ -668,6 +718,28 @@ void moveZeroes(vector<int>& nums) {
 <a id="section-3-sliding-window"></a>
 
 # 3. SLIDING WINDOW
+
+## General pattern: Sliding window
+
+**Recognise it:** a contiguous range whose state updates as endpoints move.
+
+```cpp
+int longestValidWindow(const vector<int>& values) {
+    int left = 0, answer = 0;
+    unordered_map<int, int> state;
+
+    for (int right = 0; right < static_cast<int>(values.size()); ++right) {
+        add(state, values[right]);
+        while (!isValid(state)) remove(state, values[left++]);
+        answer = max(answer, right - left + 1);
+    }
+    return answer;
+}
+```
+
+**Invariant:** after shrinking, `[left, right]` is valid; each endpoint moves forward at most n times.
+
+**Frequent variations:** fixed-size, longest valid, shortest satisfying, exactly K via two at-most counts, and monotonic-deque windows.
 
 ---
 
@@ -828,6 +900,26 @@ string minWindow(string s, string t) {
 <a id="section-4-binary-search"></a>
 
 # 4. BINARY SEARCH
+
+## General pattern: Binary search
+
+**Recognise it:** sorted data or a monotonic feasibility predicate.
+
+```cpp
+int lowerBound(const vector<int>& values, int target) {
+    int left = 0, right = values.size();
+    while (left < right) {
+        int middle = left + (right - left) / 2;
+        if (values[middle] < target) left = middle + 1;
+        else right = middle;
+    }
+    return left;
+}
+```
+
+**Invariant:** the answer remains in half-open `[left, right)`. Time O(log n).
+
+**Frequent variations:** exact search, first/last occurrence, rotated arrays, answer-space search, and implicit matrices.
 
 ---
 
@@ -1003,6 +1095,30 @@ bool canFinish(vector<int>& piles, int speed, int h) {
 
 # 5. STACKS
 
+## General pattern: Stack
+
+**Recognise it:** nesting, matching, undo order, or nearest greater/smaller values.
+
+```cpp
+vector<int> nextGreater(const vector<int>& values) {
+    vector<int> answer(values.size(), -1);
+    stack<int> unresolved;
+
+    for (int index = 0; index < static_cast<int>(values.size()); ++index) {
+        while (!unresolved.empty() && values[unresolved.top()] < values[index]) {
+            answer[unresolved.top()] = index;
+            unresolved.pop();
+        }
+        unresolved.push(index);
+    }
+    return answer;
+}
+```
+
+**Invariant:** unresolved indices remain monotonic; each is pushed and popped once.
+
+**Frequent variations:** delimiters, monotonic stacks, expression evaluation, iterative DFS, and min/history stacks.
+
 ---
 
 ## Pattern 5A: Matching Pairs (Parentheses)
@@ -1148,6 +1264,35 @@ public:
 
 # 6. QUEUES
 
+## General pattern: Queue and BFS
+
+**Recognise it:** arrival order, layers, or equal-edge shortest paths.
+
+```cpp
+vector<int> bfs(const vector<vector<int>>& graph, int start) {
+    vector<int> distance(graph.size(), -1);
+    queue<int> worklist;
+    worklist.push(start);
+    distance[start] = 0;
+
+    while (!worklist.empty()) {
+        int node = worklist.front();
+        worklist.pop();
+        for (int neighbour : graph[node]) {
+            if (distance[neighbour] == -1) {
+                distance[neighbour] = distance[node] + 1;
+                worklist.push(neighbour);
+            }
+        }
+    }
+    return distance;
+}
+```
+
+**Invariant:** mark on enqueue; first discovery is shortest. Complexity O(V + E).
+
+**Frequent variations:** level order, multi-source BFS, full-state BFS, bidirectional BFS, and monotonic deque.
+
 ---
 
 ## Pattern 6A: BFS with Queue
@@ -1252,6 +1397,29 @@ vector<int> maxSlidingWindow(vector<int>& nums, int k) {
 <a id="section-7-linked-lists"></a>
 
 # 7. LINKED LISTS
+
+## General pattern: Linked-list pointer rewiring
+
+**Recognise it:** reverse, splice, merge, or sequential pointer inspection.
+
+```cpp
+ListNode* reverseList(ListNode* head) {
+    ListNode* previous = nullptr;
+    ListNode* current = head;
+
+    while (current != nullptr) {
+        ListNode* following = current->next;
+        current->next = previous;
+        previous = current;
+        current = following;
+    }
+    return previous;
+}
+```
+
+**Invariant:** `previous` is reversed; `current` begins the untouched suffix. O(n) time, O(1) space.
+
+**Frequent variations:** dummy node, fast/slow pointers, pointer gap, sublist/k-group reversal, and sorted merge/intersection.
 
 ---
 
@@ -1371,6 +1539,24 @@ ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
 
 # 8. TREES - DFS
 
+## General pattern: Tree DFS
+
+**Recognise it:** subtree results, paths, ancestors, or recursive structure.
+
+```cpp
+int dfs(TreeNode* node) {
+    if (node == nullptr) return BASE_VALUE;
+
+    int leftResult = dfs(node->left);
+    int rightResult = dfs(node->right);
+    return combine(node, leftResult, rightResult);
+}
+```
+
+**Invariant:** define exactly what each call returns. Usually O(n) time and O(h) stack.
+
+**Frequent variations:** preorder, inorder, postorder, path-state DFS, and return-value plus global-answer problems.
+
 ---
 
 ## Pattern 8A: Basic DFS (Max Depth)
@@ -1452,6 +1638,37 @@ void dfs(TreeNode* node, int remaining, vector<int>& path, vector<vector<int>>& 
 
 # 9. TREES - BFS
 
+## General pattern: Tree BFS
+
+**Recognise it:** levels, minimum depth, nearest nodes, or side views.
+
+```cpp
+vector<vector<int>> levelOrder(TreeNode* root) {
+    vector<vector<int>> levels;
+    if (root == nullptr) return levels;
+    queue<TreeNode*> worklist;
+    worklist.push(root);
+
+    while (!worklist.empty()) {
+        int levelSize = worklist.size();
+        vector<int> level;
+        while (levelSize--) {
+            TreeNode* node = worklist.front();
+            worklist.pop();
+            level.push_back(node->val);
+            if (node->left) worklist.push(node->left);
+            if (node->right) worklist.push(node->right);
+        }
+        levels.push_back(move(level));
+    }
+    return levels;
+}
+```
+
+**Invariant:** the saved queue size is one complete depth. O(n) time, O(maximum width) space.
+
+**Frequent variations:** level collection, side views, zigzag, minimum depth, and next-pointer connections.
+
 ---
 
 ## Pattern 9A: Level Order Traversal
@@ -1516,6 +1733,41 @@ vector<int> rightSideView(TreeNode* root) {
 <a id="section-10-graphs-dfs"></a>
 
 # 10. GRAPHS - DFS
+
+## General pattern: Graph DFS and components
+
+**Recognise it:** reachability, regions, components, cycles, or exhaustive exploration.
+
+```cpp
+int countComponents(const vector<vector<int>>& graph) {
+    vector<char> visited(graph.size(), false);
+    int components = 0;
+
+    for (int start = 0; start < static_cast<int>(graph.size()); ++start) {
+        if (visited[start]) continue;
+        ++components;
+        stack<int> worklist;
+        worklist.push(start);
+        visited[start] = true;
+
+        while (!worklist.empty()) {
+            int node = worklist.top();
+            worklist.pop();
+            for (int neighbour : graph[node]) {
+                if (!visited[neighbour]) {
+                    visited[neighbour] = true;
+                    worklist.push(neighbour);
+                }
+            }
+        }
+    }
+    return components;
+}
+```
+
+**Invariant:** mark before pushing so each vertex is processed once. Complexity O(V + E).
+
+**Frequent variations:** grid flood fill, components, directed/undirected cycles, cloning, and path enumeration.
 
 ---
 
@@ -1588,6 +1840,37 @@ Node* dfs(Node* node, unordered_map<Node*, Node*>& cloned) {
 <a id="section-11-graphs-bfs-shortest-path"></a>
 
 # 11. GRAPHS - BFS (SHORTEST PATH)
+
+## General pattern: Unweighted shortest path
+
+**Recognise it:** minimum steps, moves, transformations, or equal-cost transitions.
+
+```cpp
+int shortestPath(const vector<vector<int>>& graph, int source, int target) {
+    vector<int> distance(graph.size(), -1);
+    queue<int> worklist;
+    worklist.push(source);
+    distance[source] = 0;
+
+    while (!worklist.empty()) {
+        int node = worklist.front();
+        worklist.pop();
+        if (node == target) return distance[node];
+
+        for (int neighbour : graph[node]) {
+            if (distance[neighbour] == -1) {
+                distance[neighbour] = distance[node] + 1;
+                worklist.push(neighbour);
+            }
+        }
+    }
+    return -1;
+}
+```
+
+**Invariant:** FIFO layers make first arrival shortest. Complexity O(V + E).
+
+**Frequent variations:** multi-source, generated states, masks/resources, parent reconstruction, and weighted-algorithm upgrades.
 
 ---
 
@@ -1672,6 +1955,36 @@ int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
 
 # 12. TOPOLOGICAL SORT
 
+## General pattern: Topological ordering
+
+**Recognise it:** prerequisites, dependencies, scheduling, or directed cycles.
+
+```cpp
+vector<int> topologicalOrder(
+    const vector<vector<int>>& graph, vector<int> indegree
+) {
+    queue<int> ready;
+    for (int node = 0; node < static_cast<int>(graph.size()); ++node) {
+        if (indegree[node] == 0) ready.push(node);
+    }
+
+    vector<int> order;
+    while (!ready.empty()) {
+        int node = ready.front();
+        ready.pop();
+        order.push_back(node);
+        for (int neighbour : graph[node]) {
+            if (--indegree[neighbour] == 0) ready.push(neighbour);
+        }
+    }
+    return order.size() == graph.size() ? order : vector<int>{};
+}
+```
+
+**Invariant:** only nodes with all prerequisites processed become ready. Complexity O(V + E).
+
+**Frequent variations:** cycle feasibility, return order, lexical min-heap order, DFS postorder, and DAG DP.
+
 ---
 
 ## Pattern 12A: Course Schedule (Cycle Detection)
@@ -1748,6 +2061,27 @@ vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
 <a id="section-13-heaps-priority-queue"></a>
 
 # 13. HEAPS / PRIORITY QUEUE
+
+## General pattern: Heap / priority queue
+
+**Recognise it:** repeated min/max extraction, top K, or merging sorted streams.
+
+```cpp
+priority_queue<int, vector<int>, greater<int>> keepKLargest(
+    const vector<int>& values, int k
+) {
+    priority_queue<int, vector<int>, greater<int>> minHeap;
+    for (int value : values) {
+        minHeap.push(value);
+        if (static_cast<int>(minHeap.size()) > k) minHeap.pop();
+    }
+    return minHeap;
+}
+```
+
+**Invariant:** the heap contains exactly the best candidates needed so far. O(n log k).
+
+**Frequent variations:** top K, k-way merge, priority-state scheduling/Dijkstra, two heaps, and greedy combinations.
 
 ---
 
@@ -1846,6 +2180,30 @@ public:
 <a id="section-14-backtracking"></a>
 
 # 14. BACKTRACKING
+
+## General pattern: Backtracking
+
+**Recognise it:** enumerate valid choices, arrangements, partitions, or constraint solutions.
+
+```cpp
+void backtrack(int start, vector<int>& path, vector<vector<int>>& answers) {
+    if (isComplete(path)) {
+        answers.push_back(path);
+        return;
+    }
+
+    for (int choice : candidates(start, path)) {
+        if (!isValid(choice, path)) continue;
+        path.push_back(choice);
+        backtrack(nextStart(start, choice), path, answers);
+        path.pop_back();
+    }
+}
+```
+
+**Invariant:** `path` is exactly the current branch; undo before the next sibling.
+
+**Frequent variations:** subsets/combinations, permutations, duplicate skipping, grid restore, and constraint sets.
 
 ---
 
@@ -2020,6 +2378,27 @@ void backtrack(int row, int n, vector<string>& board, unordered_set<int>& cols,
 <a id="section-15-advanced-graph-patterns"></a>
 
 # 15. ADVANCED GRAPH PATTERNS
+
+## General pattern: Model the graph before choosing the algorithm
+
+Define the **vertex**, **edge**, **direction**, **weight rules**, and extra state.
+
+| Edge / goal shape | Default pattern |
+| ----------------- | --------------- |
+| Equal weights | BFS |
+| Many sources | Multi-source BFS |
+| Weights 0/1 | 0-1 BFS |
+| Non-negative weights | Dijkstra |
+| Negative/bounded edges | Bellman-Ford |
+| DAG | Topological order + DP |
+| Dynamic connectivity | Union-Find |
+| Minimum connection cost | MST |
+| Critical structure | Low-link / SCC |
+| Every edge once | Hierholzer |
+
+**Frequent variations:** expanded state, all-pairs paths, bipartite checks, bridges, SCCs, Eulerian paths, and tree queries.
+
+---
 
 | Signal | Algorithm | Complexity |
 | ------ | --------- | ---------- |

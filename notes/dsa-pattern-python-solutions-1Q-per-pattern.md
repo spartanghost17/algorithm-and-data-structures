@@ -267,6 +267,36 @@ grid_copy = [row[:] for row in grid]
 
 ## 1. Arrays & Hashing
 
+### General pattern: Arrays and hashing
+
+**Recognise it:** you need fast existence checks, counts, complements, grouping, or information about earlier elements.
+
+```python
+def scan_with_hashing(values):
+    seen = set()
+    frequency = {}
+
+    for value in values:
+        if value in seen:
+            pass  # use information from an earlier occurrence
+        seen.add(value)
+        frequency[value] = frequency.get(value, 0) + 1
+
+    return frequency
+```
+
+**Invariant:** after processing index `i`, the table describes exactly the prefix `values[:i + 1]`. Average time is O(n), with O(n) extra space.
+
+**Frequent variations:**
+
+- Complement lookup: check `target - value` before inserting the current value.
+- Frequency counting: map each value to its count; use `Counter` when allowed.
+- Grouping: map a canonical key to a list, such as sorted letters or a frequency tuple.
+- Prefix sum + map: store how often each earlier prefix sum occurred.
+- Set membership: duplicates, longest consecutive sequence, and visited-state tracking.
+
+---
+
 ### Problem: Two Sum
 
 **Statement:** Given an array of integers `nums` and an integer `target`, return the indices of the two numbers such that they add up to target. You may assume each input has exactly one solution.
@@ -311,6 +341,40 @@ The brute force is O(n²): check every pair. But notice: if we need `a + b = tar
 <a id="section-2-two-pointers"></a>
 
 ## 2. Two Pointers
+
+### General pattern: Two pointers
+
+**Recognise it:** the answer depends on a pair, a sorted order, opposite ends, or compacting data in place.
+
+```python
+def opposite_ends(values):
+    left, right = 0, len(values) - 1
+    while left < right:
+        if should_move_left(values[left], values[right]):
+            left += 1
+        else:
+            right -= 1
+
+def same_direction(values):
+    write = 0
+    for read in range(len(values)):
+        if should_keep(values[read]):
+            values[write] = values[read]
+            write += 1
+    return write
+```
+
+**Invariant:** everything outside the active pointer range is already decided. Most scans are O(n) time and O(1) extra space.
+
+**Frequent variations:**
+
+- Opposite ends on sorted data: pair sum, container area, palindrome checks.
+- Slow/write and fast/read: remove duplicates, move zeroes, stable filtering.
+- Fast/slow speeds: linked-list cycle, middle node, happy number.
+- Sort + two pointers: 3Sum and k-sum reductions.
+- Fixed gap: kth node from the end or comparing a window's endpoints.
+
+---
 
 ### Problem: Container With Most Water
 
@@ -363,6 +427,38 @@ Start with the widest container (pointers at both ends). The only way to potenti
 <a id="section-3-sliding-window"></a>
 
 ## 3. Sliding Window
+
+### General pattern: Sliding window
+
+**Recognise it:** the input asks about a contiguous subarray/substring and the window can be updated incrementally.
+
+```python
+def longest_valid_window(values):
+    left = 0
+    answer = 0
+    state = {}
+
+    for right, value in enumerate(values):
+        add_to_state(state, value)
+        while not is_valid(state):
+            remove_from_state(state, values[left])
+            left += 1
+        answer = max(answer, right - left + 1)
+
+    return answer
+```
+
+**Invariant:** after shrinking, `[left, right]` is valid; each endpoint moves forward at most n times, so the scan is O(n).
+
+**Frequent variations:**
+
+- Fixed-size window: add the new item and remove the item that falls out.
+- Longest valid window: shrink while invalid, then maximise length.
+- Shortest satisfying window: shrink while valid, recording the minimum.
+- Exactly K: often `at_most(k) - at_most(k - 1)`.
+- Monotonic deque window: maintain candidates for a running minimum/maximum.
+
+---
 
 ### Problem: Longest Substring Without Repeating Characters
 
@@ -434,6 +530,36 @@ We want contiguous characters (substring), so sliding window fits. Expand the ri
 
 ## 4. Binary Search
 
+### General pattern: Binary search
+
+**Recognise it:** the search space is sorted or the feasibility predicate changes only once from false to true.
+
+```python
+def lower_bound(values, target):
+    left, right = 0, len(values)  # half-open [left, right)
+
+    while left < right:
+        middle = left + (right - left) // 2
+        if values[middle] < target:
+            left = middle + 1
+        else:
+            right = middle
+
+    return left
+```
+
+**Invariant:** the answer always remains inside the current half-open interval. Time is O(log n).
+
+**Frequent variations:**
+
+- Exact search: return when equal, otherwise discard half.
+- Left/right boundary: first or last occurrence among duplicates.
+- Rotated array: identify which half is sorted before discarding one side.
+- Binary search on answer: search a numeric range using monotonic `feasible(x)`.
+- Matrix/implicit search space: map an index or generate candidates.
+
+---
+
 ### Problem: Search in Rotated Sorted Array
 
 **Statement:** Given a rotated sorted array `nums` and a `target`, return the index of target or -1 if not found. The array was originally sorted in ascending order, then rotated at some pivot.
@@ -491,6 +617,35 @@ In a rotated sorted array, at least one half (left or right of mid) is always pr
 
 ## 5. Stack
 
+### General pattern: Stack
+
+**Recognise it:** nested structure, matching pairs, undo order, or the nearest previous/next greater or smaller value.
+
+```python
+def next_greater(values):
+    answer = [-1] * len(values)
+    stack = []  # unresolved indices; values decrease toward the top
+
+    for index, value in enumerate(values):
+        while stack and values[stack[-1]] < value:
+            answer[stack.pop()] = index
+        stack.append(index)
+
+    return answer
+```
+
+**Invariant:** unresolved items stay ordered so each item enters and leaves at most once, giving O(n) time.
+
+**Frequent variations:**
+
+- Matching delimiters: push openings and validate each closing token.
+- Monotonic decreasing stack: next greater; increasing: next smaller.
+- Expression evaluation: operands/operators, postfix, calculators.
+- Iterative DFS/backtracking: store frames explicitly.
+- Design stacks: min stack, frequency stack, history/undo.
+
+---
+
 ### Problem: Daily Temperatures
 
 **Statement:** Given an array `temperatures`, return an array `answer` where `answer[i]` is the number of days you have to wait after the i-th day to get a warmer temperature. If no future day is warmer, put 0.
@@ -537,6 +692,39 @@ Each day is "waiting" for a warmer day. Push days onto the stack. When a warmer 
 <a id="section-6-queue-bfs"></a>
 
 ## 6. Queue / BFS
+
+### General pattern: Queue and BFS
+
+**Recognise it:** process in arrival order, explore by layers, or find a shortest path when every edge has equal cost.
+
+```python
+from collections import deque
+
+def bfs(graph, start):
+    queue = deque([start])
+    distance = {start: 0}
+
+    while queue:
+        node = queue.popleft()
+        for neighbour in graph[node]:
+            if neighbour not in distance:
+                distance[neighbour] = distance[node] + 1
+                queue.append(neighbour)
+
+    return distance
+```
+
+**Invariant:** mark a state when enqueued; the first BFS visit is its shortest unweighted distance. Complexity is O(V + E).
+
+**Frequent variations:**
+
+- Level order: process exactly `len(queue)` items per level.
+- Multi-source BFS: enqueue every source at distance zero.
+- State-space BFS: queue `(node, mask, resource)` tuples.
+- Bidirectional BFS: expand from start and target.
+- Monotonic deque: sliding-window extrema rather than traversal.
+
+---
 
 ### Problem: Rotting Oranges
 
@@ -614,6 +802,35 @@ This is a multi-source BFS. All rotten oranges start spreading simultaneously—
 
 ## 7. Linked List
 
+### General pattern: Linked-list pointer rewiring
+
+**Recognise it:** nodes must be reversed, spliced, merged, or inspected without random access.
+
+```python
+def reverse_list(head):
+    previous, current = None, head
+
+    while current:
+        following = current.next
+        current.next = previous
+        previous = current
+        current = following
+
+    return previous
+```
+
+**Invariant:** `previous` is the reversed prefix and `current` starts the untouched suffix. Time O(n), space O(1).
+
+**Frequent variations:**
+
+- Dummy/sentinel node: deletion, insertion, and merging at the head.
+- Fast/slow pointers: middle, cycles, palindrome halves.
+- Pointer gap: advance one pointer k steps, then move both.
+- In-place reversal: whole list, sublist, or groups of k.
+- Merge/intersection: exploit sorted order or pointer identity.
+
+---
+
 ### Problem: Reverse Linked List
 
 **Statement:** Given the head of a singly linked list, reverse the list and return the new head.
@@ -683,6 +900,32 @@ def reverse_list_recursive(head: ListNode) -> ListNode:
 
 ## 8. Trees - DFS
 
+### General pattern: Tree DFS
+
+**Recognise it:** the answer depends on subtrees, root-to-leaf paths, ancestors, or a recursive structural property.
+
+```python
+def dfs(node):
+    if node is None:
+        return BASE_VALUE
+
+    left_result = dfs(node.left)
+    right_result = dfs(node.right)
+    return combine(node, left_result, right_result)
+```
+
+**Invariant:** define exactly what each call returns for its subtree. Usually O(n) time and O(h) call-stack space.
+
+**Frequent variations:**
+
+- Preorder: act before children; copying and serialising.
+- Inorder: sorted traversal of a BST.
+- Postorder: heights, balance, diameter, and child-result aggregation.
+- Path-state DFS: carry sums, bounds, or chosen nodes downward.
+- Global answer + return value: maximum path sum and similar problems.
+
+---
+
 ### Problem: Lowest Common Ancestor of Binary Tree
 
 **Statement:** Given a binary tree and two nodes `p` and `q`, find their lowest common ancestor (LCA). The LCA is the deepest node that has both p and q as descendants (a node can be a descendant of itself).
@@ -736,6 +979,44 @@ DFS down the tree. If we find p or q, return it upward. If a node receives non-n
 <a id="section-9-trees-bfs"></a>
 
 ## 9. Trees - BFS
+
+### General pattern: Tree BFS
+
+**Recognise it:** the question asks for levels, minimum depth, nearest nodes, or a left/right view.
+
+```python
+from collections import deque
+
+def level_order(root):
+    if root is None:
+        return []
+
+    queue = deque([root])
+    levels = []
+    while queue:
+        level = []
+        for _ in range(len(queue)):
+            node = queue.popleft()
+            level.append(node.val)
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+        levels.append(level)
+    return levels
+```
+
+**Invariant:** each loop snapshot contains one complete depth. Time O(n); space O(maximum width).
+
+**Frequent variations:**
+
+- Collect every level.
+- Right/left view: take the last/first node per level.
+- Zigzag: reverse alternate levels or use a deque.
+- Minimum depth: return at the first leaf.
+- Connect next pointers within each level.
+
+---
 
 ### Problem: Binary Tree Level Order Traversal
 
@@ -793,6 +1074,43 @@ BFS naturally visits nodes level by level. The key trick: before processing a le
 <a id="section-10-graphs-dfs"></a>
 
 ## 10. Graphs - DFS
+
+### General pattern: Graph DFS and components
+
+**Recognise it:** reachability, connected regions, component counting, cycles, or exhaustive exploration.
+
+```python
+def count_components(graph):
+    visited = set()
+    components = 0
+
+    for start in graph:
+        if start in visited:
+            continue
+        components += 1
+        stack = [start]
+        visited.add(start)
+        while stack:
+            node = stack.pop()
+            for neighbour in graph[node]:
+                if neighbour not in visited:
+                    visited.add(neighbour)
+                    stack.append(neighbour)
+
+    return components
+```
+
+**Invariant:** mark before adding to the worklist so every vertex is processed once. Complexity O(V + E).
+
+**Frequent variations:**
+
+- Grid flood fill with generated neighbours.
+- Connected components by restarting from unvisited vertices.
+- Directed cycles with unvisited/visiting/finished states.
+- Undirected cycles with parent-edge tracking or Union-Find.
+- Clone graphs or enumerate paths with mapping/backtracking.
+
+---
 
 ### Problem: Number of Islands
 
@@ -859,6 +1177,41 @@ Each '1' we find could be a new island. Start DFS from it to mark all connected 
 <a id="section-11-graphs-bfs-shortest-path"></a>
 
 ## 11. Graphs - BFS (Shortest Path)
+
+### General pattern: Unweighted shortest path
+
+**Recognise it:** minimum steps, moves, transformations, or equal-cost transitions.
+
+```python
+from collections import deque
+
+def shortest_path(graph, source, target):
+    queue = deque([source])
+    distance = {source: 0}
+
+    while queue:
+        node = queue.popleft()
+        if node == target:
+            return distance[node]
+        for neighbour in graph[node]:
+            if neighbour not in distance:
+                distance[neighbour] = distance[node] + 1
+                queue.append(neighbour)
+
+    return -1
+```
+
+**Invariant:** FIFO layer order means the first arrival is shortest. Complexity O(V + E).
+
+**Frequent variations:**
+
+- Multi-source distance.
+- Generated word/state transformations.
+- Full-state visited keys with masks, stops, or resources.
+- Parent maps for path reconstruction.
+- Weighted edges: 0-1 BFS, Dijkstra, or Bellman-Ford instead.
+
+---
 
 ### Problem: Shortest Path in Binary Matrix
 
@@ -931,6 +1284,34 @@ BFS explores all cells at distance K before any cell at distance K+1. So the fir
 
 ## 12. Heap / Priority Queue
 
+### General pattern: Heap / priority queue
+
+**Recognise it:** repeatedly take the current smallest/largest item, maintain top K, or merge ordered streams.
+
+```python
+import heapq
+
+def keep_k_largest(values, k):
+    min_heap = []
+    for value in values:
+        heapq.heappush(min_heap, value)
+        if len(min_heap) > k:
+            heapq.heappop(min_heap)
+    return min_heap
+```
+
+**Invariant:** the heap contains exactly the best candidates needed so far. Size-k work costs O(n log k).
+
+**Frequent variations:**
+
+- Top K / kth largest with a size-k heap.
+- K-way merge with one current item per source.
+- Scheduling/Dijkstra with `(priority, state)` entries.
+- Two heaps for a streaming median.
+- Greedy repeated combination/selection.
+
+---
+
 ### Problem: Merge K Sorted Lists
 
 **Statement:** Given an array of `k` linked lists, each sorted in ascending order, merge all lists into one sorted linked list.
@@ -989,6 +1370,36 @@ At any moment, the next smallest element must be the head of one of the K lists.
 <a id="section-13-backtracking"></a>
 
 ## 13. Backtracking
+
+### General pattern: Backtracking
+
+**Recognise it:** enumerate all valid choices, arrangements, partitions, or constraint-satisfying configurations.
+
+```python
+def backtrack(start, path):
+    if is_complete(path):
+        answers.append(path.copy())
+        return
+
+    for choice in candidates(start, path):
+        if not is_valid(choice, path):
+            continue
+        apply(choice, path)
+        backtrack(next_start(start, choice), path)
+        undo(choice, path)
+```
+
+**Invariant:** `path` is exactly the current branch. Undo every mutation before exploring a sibling.
+
+**Frequent variations:**
+
+- Subsets/combinations with an advancing start index.
+- Permutations with used indices or in-place swaps.
+- Duplicate handling by sorting and skipping at the same depth.
+- Grid search with mark, recurse, restore.
+- Constraint sets for columns, diagonals, rows, etc.
+
+---
 
 ### Problem: Combination Sum
 
@@ -1049,6 +1460,40 @@ Backtracking = controlled brute force. At each step, try adding each candidate. 
 <a id="section-14-graph-topological-sort"></a>
 
 ## 14. Graph - Topological Sort
+
+### General pattern: Topological ordering
+
+**Recognise it:** prerequisites, dependencies, build order, scheduling, or directed-cycle detection.
+
+```python
+from collections import deque
+
+def topological_order(graph, indegree):
+    queue = deque(node for node, degree in enumerate(indegree) if degree == 0)
+    order = []
+
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbour in graph[node]:
+            indegree[neighbour] -= 1
+            if indegree[neighbour] == 0:
+                queue.append(neighbour)
+
+    return order if len(order) == len(graph) else []
+```
+
+**Invariant:** only nodes with all prerequisites processed enter the queue. Complexity O(V + E).
+
+**Frequent variations:**
+
+- Feasibility/cycle detection by processed count.
+- Return one valid order.
+- Lexicographically smallest order with a min-heap.
+- DFS postorder plus visiting-state cycle detection.
+- DAG DP for path counts, shortest/longest paths, or completion time.
+
+---
 
 ### Problem: Course Schedule
 
@@ -1151,6 +1596,27 @@ Model as a directed graph: edge from A to B means "A must come before B". Topolo
 <a id="section-graph-mastery-expansion-one-question-per-advanced-pattern"></a>
 
 ## Graph Mastery Expansion: One Question Per Advanced Pattern
+
+### General pattern: Model the graph before choosing the algorithm
+
+Define the **vertex**, **edge**, **direction**, **weight rules**, and extra state such as keys, stops, masks, or resources.
+
+| Edge / goal shape | Default pattern |
+| ----------------- | --------------- |
+| Equal-weight shortest path | BFS |
+| Many simultaneous sources | Multi-source BFS |
+| Weights only 0 or 1 | 0-1 BFS |
+| Non-negative weights | Dijkstra |
+| Negative edges / bounded edges | Bellman-Ford |
+| DAG dependency/path | Topological order + DP |
+| Dynamic connectivity | Union-Find |
+| Minimum total connection | MST |
+| Critical edges/components | Low-link DFS / SCC |
+| Use every edge once | Hierholzer |
+
+**Frequent variations:** shortest path with state, all-pairs paths, bipartite colouring, bridges, SCCs, Eulerian routes, and tree-query preprocessing.
+
+---
 
 ### G1. Dijkstra - Network Delay Time
 
